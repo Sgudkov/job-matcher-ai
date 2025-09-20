@@ -8,6 +8,8 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "ruff (>=0.13.1,<0.14.0)",
+    "mypy (>=1.18.2,<2.0.0)"
 ]
 
 
