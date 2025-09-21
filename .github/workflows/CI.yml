@@ -48,13 +48,10 @@ jobs:
 #              ${{ runner.os }}-poetry-packages-
 
       - name: Install dependencies
-        run: |
-          poetry install --no-root
+        run: poetry install --no-root
 
       - name: Run Ruff check
-        run: |
-          poetry run ruff check .
+        run: poetry run ruff check .
 
       - name: Run mypy check
-        run: |
-          poetry run mypy .
+        run: poetry run mypy .
