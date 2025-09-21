@@ -45,26 +45,6 @@ jobs:
         run: |
             poetry install --no-root
 
-#      - name: Cache Poetry virtualenv # ЯВНОЕ КЭШИРОВАНИЕ VIRTUALENV
-#        uses: actions/cache@v3
-#        with:
-#          path: ~/.cache/pypoetry/virtualenvs
-#          key: ${{ runner.os }}-poetry-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
-#          restore-keys: |
-#              ${{ runner.os }}-poetry-${{ matrix.python-version }}-
-#              ${{ runner.os }}-poetry-
-#
-#      - name: Cache Poetry packages  # ← 3. КЭШИРОВАНИЕ ПАКЕТОВ
-#        uses: actions/cache@v3
-#        with:
-#          path: ~/.cache/pypoetry
-#          key: ${{ runner.os }}-poetry-packages-${{ hashFiles('**/poetry.lock') }}
-#          restore-keys: |
-#              ${{ runner.os }}-poetry-packages-
-
-#      - name: Install dependencies
-#        run: poetry install --no-root
-
       - name: Run Ruff check
         run: poetry run ruff check .
 
