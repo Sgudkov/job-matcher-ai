@@ -25,46 +25,25 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
-#          cache: "pip"
+          cache: "poetry"
 
       - name: Install Poetry
         run: pip install "poetry>=2.0"
-#        run: pip install poetry
+
+      - name: Configure Poetry
+        run: poetry config virtualenvs.in-project true
+
+      - name: Cache virtual environment
+        uses: actions/cache@v4
+        id: cache-venv
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
+          restore-keys: |
+            venv-${{ runner.os }}-${{ matrix.python-version }}-
 
       - name: Install poetry-plugins
         run: pip install poetry-plugin-export
-
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cache/pypoetry
-            ~/.cache/pip
-          key: ${{ runner.os }}-${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-poetry-
-
-      - name: Install dependencies with Poetry
-        run: poetry install --no-interaction --no-root --no-ansi
-
-#      - name: Cache dependencies
-#        uses: actions/cache@v4
-#        with:
-#          path: |
-#            ~/.cache/pip
-#            ~/.cache/uv
-#          key: ${{ runner.os }}-${{ matrix.python-version }}-deps-${{ hashFiles('poetry.lock') }}
-#          restore-keys: |
-#            ${{ runner.os }}-${{ matrix.python-version }}-deps-
-#
-#      - name: Export dependencies from Poetry
-#        run: poetry export -f requirements.txt --without-hashes -o requirements.txt
-#
-#      - name: Install uv (fast package installer)
-#        run: pip install uv
-#
-#      - name: Install dependencies with uv
-#        run: uv pip install -r requirements.txt --system --no-cache-dir
 
 #      - name: Cache Poetry dependencies
 #        uses: actions/cache@v4
@@ -75,13 +54,13 @@ jobs:
 #          key: ${{ runner.os }}-${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}
 #          restore-keys: |
 #            ${{ runner.os }}-${{ matrix.python-version }}-poetry-
-#
-#      - name: Install dependencies
-#        run: |
-#          poetry install --no-interaction --no-root --sync
 
-      - name: Run Ruff check
-        run: poetry run ruff check .
+      - name: Install dependencies with Poetry
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root --no-ansi --only main
 
-      - name: Run mypy check
-        run: poetry run mypy .
+      - name: Run checks in parallel
+        run: |
+          poetry run ruff check . &
+          poetry run mypy . &
+          wait
