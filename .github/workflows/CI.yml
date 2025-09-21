@@ -15,23 +15,45 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: [ "3.10", "3.11", "3.12" ]
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
-        cache: 'poetry'
-    - name: Install Poetry
-      run: |
-        pip install poetry
-    - name: Install dependencies
-      run: |
-        poetry install --no-root
-    - name: Run Ruff check
-      run: |
-        poetry run ruff check .
-    - name: Run mypy check
-      run: |
-        poetry run mypy .
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'poetry' # КЭШИРОВАНИЕ ЧЕРЕЗ setup-python
+
+      - name: Install Poetry
+        run: |
+          pipx install poetry==1.6.1
+
+#      - name: Cache Poetry virtualenv # ЯВНОЕ КЭШИРОВАНИЕ VIRTUALENV
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.cache/pypoetry/virtualenvs
+#          key: ${{ runner.os }}-poetry-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
+#          restore-keys: |
+#              ${{ runner.os }}-poetry-${{ matrix.python-version }}-
+#              ${{ runner.os }}-poetry-
+#
+#      - name: Cache Poetry packages  # ← 3. КЭШИРОВАНИЕ ПАКЕТОВ
+#        uses: actions/cache@v3
+#        with:
+#          path: ~/.cache/pypoetry
+#          key: ${{ runner.os }}-poetry-packages-${{ hashFiles('**/poetry.lock') }}
+#          restore-keys: |
+#              ${{ runner.os }}-poetry-packages-
+
+      - name: Install dependencies
+        run: |
+          poetry install --no-root
+
+      - name: Run Ruff check
+        run: |
+          poetry run ruff check .
+
+      - name: Run mypy check
+        run: |
+          poetry run mypy .
