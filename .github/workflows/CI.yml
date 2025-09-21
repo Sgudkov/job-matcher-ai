@@ -26,7 +26,7 @@ jobs:
           cache: 'poetry' # КЭШИРОВАНИЕ ЧЕРЕЗ setup-python
 
       - name: Install Poetry
-        run: pipx install poetry
+        run: pip install poetry
 
 #      - name: Cache Poetry virtualenv # ЯВНОЕ КЭШИРОВАНИЕ VIRTUALENV
 #        uses: actions/cache@v3
