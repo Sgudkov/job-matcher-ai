@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'poetry' # КЭШИРОВАНИЕ ЧЕРЕЗ setup-python
+#          cache: 'poetry' # КЭШИРОВАНИЕ ЧЕРЕЗ setup-python
 
       - name: Install pipx
         run: pip install pipx
