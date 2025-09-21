@@ -27,15 +27,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
 #          cache: "pip"
 
-      - name: Install pipx
-        run: pip install pipx
-
       - name: Install Poetry
-        run: pipx install "poetry>=1.2.0"
+        run: pip install "poetry>=2.0"
 #        run: pip install poetry
 
       - name: Install poetry-plugins
-        run: pipx inject poetry poetry-plugin
+        run: pip install poetry-plugin-export
 
       - name: Cache dependencies
         uses: actions/cache@v4
