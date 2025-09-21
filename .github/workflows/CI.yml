@@ -23,13 +23,27 @@ jobs:
         uses: actions/setup-python@v3
         with:
           python-version: ${{ matrix.python-version }}
-#          cache: 'poetry' # КЭШИРОВАНИЕ ЧЕРЕЗ setup-python
-
-      - name: Install pipx
-        run: pip install pipx
 
       - name: Install Poetry
         run: pip install poetry
+
+      - name: Configure Poetry to create virtual environment in project
+        run: |
+            poetry config virtualenvs.in-project true
+
+      - name: Cache Poetry dependencies
+        id: cache-deps
+        uses: actions/cache@v4
+        with:
+          path: ./.venv # Cache the virtual environment located in the project
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+              ${{ runner.os }}-poetry-
+
+      - name: Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true' # Only install if cache miss
+        run: |
+            poetry install --no-root
 
 #      - name: Cache Poetry virtualenv # ЯВНОЕ КЭШИРОВАНИЕ VIRTUALENV
 #        uses: actions/cache@v3
@@ -48,8 +62,8 @@ jobs:
 #          restore-keys: |
 #              ${{ runner.os }}-poetry-packages-
 
-      - name: Install dependencies
-        run: poetry install --no-root
+#      - name: Install dependencies
+#        run: poetry install --no-root
 
       - name: Run Ruff check
         run: poetry run ruff check .
