@@ -43,7 +43,7 @@ class SqlCandidate(CandidateMembers):
         stmt = select(CandidateORM)
         candidates_orm = await self.session.execute(stmt)
         if candidates_orm is None:
-            raise ValueError(f"""Candidates not found""")
+            raise ValueError("""Candidates not found""")
         return [Candidate(
             user_id=UUID(str(candidate_orm.user_id)),
             first_name=str(candidate_orm.first_name),
