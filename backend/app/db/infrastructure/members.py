@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -15,7 +17,7 @@ class SqlCandidate(CandidateMembers):
             first_name=candidate.first_name,
             last_name=candidate.last_name,
             email=candidate.email,
-            phone=candidate.phone,
+            phone=str(candidate.phone),
             soft_skill=candidate.soft_skill,
             hard_skill=candidate.hard_skill
         )
@@ -23,14 +25,27 @@ class SqlCandidate(CandidateMembers):
         self.session.add(candidate_orm)
         return candidate_orm
 
-    async def get(self, user_id: int):
-        candidate_orm = await self.session.get(CandidateORM, user_id)
-        return candidate_orm
+    async def get(self, id_key: int) -> Candidate:
+        candidate_orm = await self.session.get(CandidateORM, id_key)
+        if candidate_orm is None:
+            raise ValueError(f"""Candidate with id {id_key} not found""")
+        return Candidate(
+            user_id=UUID(str(candidate_orm.user_id)),
+            first_name=str(candidate_orm.first_name),
+            last_name=str(candidate_orm.last_name),
+            email=str(candidate_orm.email),
+            phone=str(candidate_orm.phone),
+            soft_skill=str(candidate_orm.soft_skill),
+            hard_skill=str(candidate_orm.hard_skill)
+        )
 
     async def get_all(self) -> list[Candidate]:
         stmt = select(CandidateORM)
         candidates_orm = await self.session.execute(stmt)
+        if candidates_orm is None:
+            raise ValueError(f"""Candidates not found""")
         return [Candidate(
+            user_id=UUID(str(candidate_orm.user_id)),
             first_name=str(candidate_orm.first_name),
             last_name=str(candidate_orm.last_name),
             email=str(candidate_orm.email),

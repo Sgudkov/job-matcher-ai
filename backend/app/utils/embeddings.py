@@ -1,54 +1,64 @@
-from uuid import uuid4
 
 from numpy import ndarray
 from qdrant_client.models import PointStruct
 from sentence_transformers import SentenceTransformer
-from backend.app.config import SalonDataType
+from backend.app.config import MembersDataType
 import numpy as np
 
+from backend.app.models.candidate import CandidateBase
+from backend.app.models.employer import EmployerBase
 
-class CandidateEmbeddingSystem:
+
+class MembersEmbeddingSystem:
     def __init__(self):
         self.soft_model = SentenceTransformer("ai-forever/ru-en-RoSBERTa")
         self.hard_model = SentenceTransformer("sentence-transformers/multi-qa-MiniLM-L6-cos-v1")
 
-    def vectorize_candidate_data(self, candidate_data: str, skill: SalonDataType) -> list[PointStruct]:
+    def vectorize_candidate_data(self, candidate: CandidateBase, skill: MembersDataType) -> list[PointStruct]:
         point_struct: list[PointStruct] = []
 
+        candidate_data: str = ""
+
         match skill:
-            case SalonDataType.SOFT_SKILL:
+            case MembersDataType.SOFT_SKILL:
                 model = self.soft_model
-            case SalonDataType.HARD_SKILL:
+                candidate_data = candidate.soft_skill
+            case MembersDataType.HARD_SKILL:
                 model = self.hard_model
+                candidate_data = candidate.hard_skill
             case _:
                 model = self.soft_model
 
-        embedding = CandidateEmbeddingSystem.encode_long_text(candidate_data, model)
+        embedding = MembersEmbeddingSystem.encode_long_text(candidate_data, model)
 
         point_struct.append(
             PointStruct(
-                id=int(uuid4()),
+                id=str(candidate.user_id),
                 vector=embedding.tolist(),
             ))
 
         return point_struct
 
-    def vectorize_employer_data(self, employer_data: str, skill: SalonDataType) -> list[PointStruct]:
+    def vectorize_employer_data(self, employer: EmployerBase, skill: MembersDataType) -> list[PointStruct]:
         point_struct: list[PointStruct] = []
 
+        employer_data: str = ""
+
         match skill:
-            case SalonDataType.SOFT_SKILL:
+            case MembersDataType.SOFT_SKILL:
                 model = self.soft_model
-            case SalonDataType.HARD_SKILL:
+                employer_data = employer.soft_skill
+            case MembersDataType.HARD_SKILL:
                 model = self.hard_model
+                employer_data = employer.hard_skill
             case _:
                 model = self.soft_model
 
-        embedding = CandidateEmbeddingSystem.encode_long_text(employer_data, model)
+        embedding = MembersEmbeddingSystem.encode_long_text(employer_data, model)
 
         point_struct.append(
             PointStruct(
-                id=int(uuid4()),
+                id=str(employer.employer_id),
                 vector=embedding.tolist(),
             ))
 
@@ -75,4 +85,4 @@ class CandidateEmbeddingSystem:
         return np.mean(chunk_embeddings, axis=0)
 
 
-candidate_embedding_system = CandidateEmbeddingSystem()
+candidate_embedding_system = MembersEmbeddingSystem()

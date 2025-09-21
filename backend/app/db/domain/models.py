@@ -1,8 +1,6 @@
 from dataclasses import dataclass, field
 from uuid import uuid4, UUID
 
-from qdrant_client.http.models import PointStruct
-
 
 @dataclass
 class Candidate:
@@ -12,9 +10,7 @@ class Candidate:
     email: str = ""
     phone: str = ""
     hard_skill: str = ""
-    embedding_hard: list[PointStruct] = field(default_factory=list)
     soft_skill: str = ""
-    embedding_soft: list[PointStruct] = field(default_factory=list)
 
 
 @dataclass
@@ -25,6 +21,4 @@ class Employer:
     email: str = ""
     phone: str = ""
     hard_skill: str = ""
-    embedding_hard: list[PointStruct] = field(default_factory=list)
     soft_skill: str = ""
-    embedding_soft: list[PointStruct] = field(default_factory=list)

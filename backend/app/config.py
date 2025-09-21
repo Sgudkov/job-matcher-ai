@@ -4,7 +4,14 @@ from enum import Enum
 from pydantic_settings import BaseSettings
 
 
-class SalonDataType(Enum):
+class QdrantCollection(Enum):
+    CANDIDATES_HARD = "candidates_hard"
+    CANDIDATES_SOFT = "candidates_soft"
+    EMPLOYERS_HARD = "employers_hard"
+    EMPLOYERS_SOFT = "employers_soft"
+
+
+class MembersDataType(Enum):
     CANDIDATE = "candidate"
     EMPLOYER = "employer"
     HARD_SKILL = "hard_skill"
