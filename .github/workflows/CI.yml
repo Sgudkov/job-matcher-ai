@@ -26,9 +26,7 @@ jobs:
           cache: 'poetry' # КЭШИРОВАНИЕ ЧЕРЕЗ setup-python
 
       - name: Install Poetry
-        uses: abatilo/actions-poetry@v3
-        with:
-            poetry-version: "1.6.1"
+        run: pipx install poetry
 
 #      - name: Cache Poetry virtualenv # ЯВНОЕ КЭШИРОВАНИЕ VIRTUALENV
 #        uses: actions/cache@v3
