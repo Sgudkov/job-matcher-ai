@@ -78,7 +78,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-            poetry install --no-interaction --no-root
+            poetry install --no-interaction --no-root -vvv
 
       - name: Run Ruff check
         run: poetry run ruff check .
