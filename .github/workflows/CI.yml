@@ -25,6 +25,9 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry' # КЭШИРОВАНИЕ ЧЕРЕЗ setup-python
 
+      - name: Install pipx
+        run: pip install pipx
+
       - name: Install Poetry
         run: pip install poetry
 
