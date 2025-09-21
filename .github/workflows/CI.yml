@@ -38,17 +38,34 @@ jobs:
           virtualenvs-in-project: true
           installer-parallel: true
 
-      - name: Cache Poetry dependencies
+      - name: Cache Poetry packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-packages-${{ hashFiles('**/poetry.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-poetry-packages-
+
+      - name: Cache Poetry virtualenv
         id: cache-deps
         uses: actions/cache@v4
         with:
-          path: ./.venv # Cache the virtual environment located in the project
-          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          path: .venv
+          key: ${{ runner.os }}-poetry-${{ matrix.python-version }}-${{ hashFiles('**/poetry.lock') }}
           restore-keys: |
-              ${{ runner.os }}-poetry-
+            ${{ runner.os }}-poetry-${{ matrix.python-version }}-
+            ${{ runner.os }}-poetry-
+
+#      - name: Cache Poetry dependencies
+#        id: cache-deps
+#        uses: actions/cache@v4
+#        with:
+#          path: ./.venv # Cache the virtual environment located in the project
+#          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+#          restore-keys: |
+#              ${{ runner.os }}-poetry-
 
       - name: Install dependencies
-        timeout-minutes: 15
         run: |
             poetry install --no-root --no-interaction --no-ansi
 
