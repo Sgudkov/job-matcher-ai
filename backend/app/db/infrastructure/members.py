@@ -28,7 +28,7 @@ class SqlCandidate(CandidateMembers):
     async def get(self, id_key: int) -> Candidate:
         candidate_orm = await self.session.get(CandidateORM, id_key)
         if candidate_orm is None:
-            raise ValueError(f"""Candidate with id {id_key} not found""")
+            raise ValueError(f"Candidate with id {id_key} not found")
         return Candidate(
             user_id=UUID(str(candidate_orm.user_id)),
             first_name=str(candidate_orm.first_name),
