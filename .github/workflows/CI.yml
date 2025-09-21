@@ -34,24 +34,37 @@ jobs:
       - name: Install poetry-plugins
         run: pip install poetry-plugin-export
 
-      - name: Cache dependencies
+      - name: Cache Poetry dependencies
         uses: actions/cache@v4
         with:
           path: |
+            ~/.cache/pypoetry
             ~/.cache/pip
-            ~/.cache/uv
-          key: ${{ runner.os }}-${{ matrix.python-version }}-deps-${{ hashFiles('poetry.lock') }}
+          key: ${{ runner.os }}-${{ matrix.python-version }}-poetry-${{ hashFiles('poetry.lock') }}
           restore-keys: |
-            ${{ runner.os }}-${{ matrix.python-version }}-deps-
+            ${{ runner.os }}-${{ matrix.python-version }}-poetry-
 
-      - name: Export dependencies from Poetry
-        run: poetry export -f requirements.txt --without-hashes -o requirements.txt
+      - name: Install dependencies with Poetry
+        run: poetry install --no-interaction --sync
 
-      - name: Install uv (fast package installer)
-        run: pip install uv
-
-      - name: Install dependencies with uv
-        run: uv pip install -r requirements.txt --system --no-cache-dir
+#      - name: Cache dependencies
+#        uses: actions/cache@v4
+#        with:
+#          path: |
+#            ~/.cache/pip
+#            ~/.cache/uv
+#          key: ${{ runner.os }}-${{ matrix.python-version }}-deps-${{ hashFiles('poetry.lock') }}
+#          restore-keys: |
+#            ${{ runner.os }}-${{ matrix.python-version }}-deps-
+#
+#      - name: Export dependencies from Poetry
+#        run: poetry export -f requirements.txt --without-hashes -o requirements.txt
+#
+#      - name: Install uv (fast package installer)
+#        run: pip install uv
+#
+#      - name: Install dependencies with uv
+#        run: uv pip install -r requirements.txt --system --no-cache-dir
 
 #      - name: Cache Poetry dependencies
 #        uses: actions/cache@v4
