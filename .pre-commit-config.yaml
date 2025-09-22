@@ -1,0 +1,24 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace   # Удаляет лишние пробелы в конце строк
+      - id: end-of-file-fixer     # ensures the file ends with a newline
+      - id: check-yaml            # Проверяет синтаксис YAML-файлов
+      - id: check-added-large-files # запрещает коммитить большие файлы
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0 # Replace with the latest Ruff version
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix] # Optional: automatically fix issues and fail if fixes were applied
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.10.0 # Use the latest stable MyPy version
+    hooks:
+      - id: mypy
+        # Optional: Add arguments to MyPy, e.g., --strict
+        # args: [--strict]
+        # Optional: Specify additional dependencies MyPy needs, if not in your main project dependencies
+        # additional_dependencies: ["django-stubs", "types-requests"]
