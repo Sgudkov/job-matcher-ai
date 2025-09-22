@@ -4,9 +4,16 @@ import os
 from dotenv import load_dotenv
 from numpy import ndarray
 from qdrant_client import QdrantClient
-from qdrant_client.http.models import VectorParams, Distance, PointStruct, Record
+from qdrant_client.http.models import (
+    VectorParams,
+    Distance,
+    PointStruct,
+    Record,
+)
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from torch import Tensor
+
+from backend.app.config import MembersDataType
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -40,10 +47,17 @@ class QdrantAPI:
     def __init__(self):
         self.client = QdrantClient(url=QDRANT_URL)
 
-    def create_collection(self, collection_name: str, vectors: int) -> bool:
+    def create_collection(self, collection_name: str) -> bool:
         return self.client.create_collection(
             collection_name=collection_name,
-            vectors_config=VectorParams(size=vectors, distance=Distance.COSINE),
+            vectors_config={
+                MembersDataType.HARD_SKILL.value: VectorParams(
+                    size=384, distance=Distance.COSINE
+                ),
+                MembersDataType.SOFT_SKILL.value: VectorParams(
+                    size=1024, distance=Distance.COSINE
+                ),
+            },
         )
 
     def add_vectors(self, collection_name: str, vectors: list[PointStruct]):

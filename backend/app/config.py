@@ -5,10 +5,8 @@ from pydantic_settings import BaseSettings
 
 
 class QdrantCollection(Enum):
-    CANDIDATES_HARD = "candidates_hard"
-    CANDIDATES_SOFT = "candidates_soft"
-    EMPLOYERS_HARD = "employers_hard"
-    EMPLOYERS_SOFT = "employers_soft"
+    CANDIDATES = "candidates"
+    EMPLOYERS = "employers"
 
 
 class MembersDataType(Enum):

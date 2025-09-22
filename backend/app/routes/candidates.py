@@ -48,7 +48,7 @@ async def get_candidate_vector(candidate_id: int, db: AsyncSession = Depends(get
     try:
         candidate = await candidate_members.get(id_key=candidate_id)
         embeddings_hard = qdrant_api.retrieve(
-            QdrantCollection.CANDIDATES_HARD.value, [str(candidate.user_id)]
+            QdrantCollection.CANDIDATES.value, [str(candidate.user_id)]
         )
         return embeddings_hard
     except Exception as e:

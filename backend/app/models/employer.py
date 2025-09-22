@@ -17,8 +17,7 @@ class EmployerBase(BaseModel):
 
 
 class EmployerEmbedding(BaseModel):
-    embedding_soft: list[PointStruct] = field(default_factory=list)
-    embedding_hard: list[PointStruct] = field(default_factory=list)
+    embeddings: list[PointStruct] = field(default_factory=list)
 
 
 class EmployerCreate(EmployerBase):

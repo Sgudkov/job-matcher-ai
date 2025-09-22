@@ -24,16 +24,10 @@ for collection in QdrantCollection:
 
     vector_size = 0
 
-    if "soft" in collection_name:
-        vector_size = 1024
-
-    if "hard" in collection_name:
-        vector_size = 384
-
     if qdrant_api.client.collection_exists(collection_name):
         continue
 
-    if not qdrant_api.create_collection(collection_name, vector_size):
+    if not qdrant_api.create_collection(collection_name):
         logger.error(f"Error creating collection {collection_name}")
 
 
@@ -61,10 +55,8 @@ async def storage_candidate(
 
     # добавление векторов в Qdrant
     qdrant_api.add_vectors(
-        QdrantCollection.CANDIDATES_HARD.value, embedding.embedding_hard
-    )
-    qdrant_api.add_vectors(
-        QdrantCollection.CANDIDATES_SOFT.value, embedding.embedding_soft
+        collection_name=QdrantCollection.CANDIDATES.value,
+        vectors=embedding.embeddings,
     )
 
     return new_candidate
@@ -94,10 +86,8 @@ async def storage_employer(
 
     # добавление векторов в Qdrant
     qdrant_api.add_vectors(
-        QdrantCollection.EMPLOYERS_HARD.value, embedding.embedding_hard
-    )
-    qdrant_api.add_vectors(
-        QdrantCollection.EMPLOYERS_SOFT.value, embedding.embedding_soft
+        collection_name=QdrantCollection.EMPLOYERS.value,
+        vectors=embedding.embeddings,
     )
 
     return new_employer

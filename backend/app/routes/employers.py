@@ -46,7 +46,7 @@ async def get_employer_vector(employer_id: int, db: AsyncSession = Depends(get_d
     try:
         employer = await employer_members.get(id_key=employer_id)
         embeddings_hard = qdrant_api.retrieve(
-            QdrantCollection.EMPLOYERS_HARD.value, [str(employer.user_id)]
+            QdrantCollection.EMPLOYERS.value, [str(employer.user_id)]
         )
         return embeddings_hard
     except Exception as e:

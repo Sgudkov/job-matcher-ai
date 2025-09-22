@@ -18,12 +18,14 @@ class CandidateBase(BaseModel):
 
 
 class CandidateEmbedding(BaseModel):
-    embedding_soft: list[PointStruct] = field(default_factory=list)
-    embedding_hard: list[PointStruct] = field(default_factory=list)
+    embeddings: list[PointStruct] = field(default_factory=list)
 
 
 class CandidateCreate(CandidateBase):
     pass
+
+
+# class CandidateMatch(BaseModel):
 
 
 class CandidateResponse(CandidateBase):

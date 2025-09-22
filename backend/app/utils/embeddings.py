@@ -15,57 +15,45 @@ class MembersEmbeddingSystem:
             "sentence-transformers/multi-qa-MiniLM-L6-cos-v1"
         )
 
-    def vectorize_candidate_data(
-        self, candidate: CandidateBase, skill: MembersDataType
-    ) -> list[PointStruct]:
+    def vectorize_candidate_data(self, candidate: CandidateBase) -> list[PointStruct]:
         point_struct: list[PointStruct] = []
 
-        candidate_data: str = ""
-
-        match skill:
-            case MembersDataType.SOFT_SKILL:
-                model = self.soft_model
-                candidate_data = candidate.soft_skill
-            case MembersDataType.HARD_SKILL:
-                model = self.hard_model
-                candidate_data = candidate.hard_skill
-            case _:
-                model = self.soft_model
-
-        embedding = MembersEmbeddingSystem.encode_long_text(candidate_data, model)
+        embedding_soft = MembersEmbeddingSystem.encode_long_text(
+            candidate.soft_skill, self.soft_model
+        )
+        embedding_hard = MembersEmbeddingSystem.encode_long_text(
+            candidate.hard_skill, self.hard_model
+        )
 
         point_struct.append(
             PointStruct(
                 id=str(candidate.user_id),
-                vector=embedding.tolist(),
+                vector={
+                    MembersDataType.SOFT_SKILL.value: embedding_soft.tolist(),
+                    MembersDataType.HARD_SKILL.value: embedding_hard.tolist(),
+                },
             )
         )
 
         return point_struct
 
-    def vectorize_employer_data(
-        self, employer: EmployerBase, skill: MembersDataType
-    ) -> list[PointStruct]:
+    def vectorize_employer_data(self, employer: EmployerBase) -> list[PointStruct]:
         point_struct: list[PointStruct] = []
 
-        employer_data: str = ""
-
-        match skill:
-            case MembersDataType.SOFT_SKILL:
-                model = self.soft_model
-                employer_data = employer.soft_skill
-            case MembersDataType.HARD_SKILL:
-                model = self.hard_model
-                employer_data = employer.hard_skill
-            case _:
-                model = self.soft_model
-
-        embedding = MembersEmbeddingSystem.encode_long_text(employer_data, model)
+        embedding_soft = MembersEmbeddingSystem.encode_long_text(
+            employer.soft_skill, self.soft_model
+        )
+        embedding_hard = MembersEmbeddingSystem.encode_long_text(
+            employer.hard_skill, self.hard_model
+        )
 
         point_struct.append(
             PointStruct(
                 id=str(employer.employer_id),
-                vector=embedding.tolist(),
+                vector={
+                    MembersDataType.SOFT_SKILL.value: embedding_soft.tolist(),
+                    MembersDataType.HARD_SKILL.value: embedding_hard.tolist(),
+                },
             )
         )
 
