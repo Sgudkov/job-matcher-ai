@@ -1,4 +1,3 @@
-
 from numpy import ndarray
 from qdrant_client.models import PointStruct
 from sentence_transformers import SentenceTransformer
@@ -12,9 +11,13 @@ from backend.app.models.employer import EmployerBase
 class MembersEmbeddingSystem:
     def __init__(self):
         self.soft_model = SentenceTransformer("ai-forever/ru-en-RoSBERTa")
-        self.hard_model = SentenceTransformer("sentence-transformers/multi-qa-MiniLM-L6-cos-v1")
+        self.hard_model = SentenceTransformer(
+            "sentence-transformers/multi-qa-MiniLM-L6-cos-v1"
+        )
 
-    def vectorize_candidate_data(self, candidate: CandidateBase, skill: MembersDataType) -> list[PointStruct]:
+    def vectorize_candidate_data(
+        self, candidate: CandidateBase, skill: MembersDataType
+    ) -> list[PointStruct]:
         point_struct: list[PointStruct] = []
 
         candidate_data: str = ""
@@ -35,11 +38,14 @@ class MembersEmbeddingSystem:
             PointStruct(
                 id=str(candidate.user_id),
                 vector=embedding.tolist(),
-            ))
+            )
+        )
 
         return point_struct
 
-    def vectorize_employer_data(self, employer: EmployerBase, skill: MembersDataType) -> list[PointStruct]:
+    def vectorize_employer_data(
+        self, employer: EmployerBase, skill: MembersDataType
+    ) -> list[PointStruct]:
         point_struct: list[PointStruct] = []
 
         employer_data: str = ""
@@ -60,12 +66,15 @@ class MembersEmbeddingSystem:
             PointStruct(
                 id=str(employer.employer_id),
                 vector=embedding.tolist(),
-            ))
+            )
+        )
 
         return point_struct
 
     @staticmethod
-    def encode_long_text(text, model: SentenceTransformer, chunk_size=512, overlap=50) -> ndarray:
+    def encode_long_text(
+        text, model: SentenceTransformer, chunk_size=512, overlap=50
+    ) -> ndarray:
         """
         Векторизация длинного текста с разбиением на chunks
         """
@@ -75,7 +84,7 @@ class MembersEmbeddingSystem:
 
         # Создаем overlapping chunks
         for i in range(0, len(words), chunk_size - overlap):
-            chunk = ' '.join(words[i:i + chunk_size])
+            chunk = " ".join(words[i : i + chunk_size])
             chunks.append(chunk)
 
         # Кодируем все chunks

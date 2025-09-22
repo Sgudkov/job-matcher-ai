@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.config import QdrantCollection
 from backend.app.db.infrastructure.database import get_db, qdrant_api
-from backend.app.db.infrastructure.members import SqlCandidate, SqlEmployer
+from backend.app.db.infrastructure.members import SqlEmployer
 from backend.app.models.employer import EmployerCreate
 from backend.app.services.storage import storage_employer
 
@@ -45,7 +45,9 @@ async def get_employer_vector(employer_id: int, db: AsyncSession = Depends(get_d
     employer_members = SqlEmployer(db)
     try:
         employer = await employer_members.get(id_key=employer_id)
-        embeddings_hard = qdrant_api.retrieve(QdrantCollection.EMPLOYERS_HARD.value, [str(employer.user_id)])
+        embeddings_hard = qdrant_api.retrieve(
+            QdrantCollection.EMPLOYERS_HARD.value, [str(employer.user_id)]
+        )
         return embeddings_hard
     except Exception as e:
         logger.error(f"Error getting employer: {e}")

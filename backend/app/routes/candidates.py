@@ -17,7 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 @router.post("/candidates/")
-async def create_candidate(candidate: CandidateCreate, db: AsyncSession = Depends(get_db)):
+async def create_candidate(
+    candidate: CandidateCreate, db: AsyncSession = Depends(get_db)
+):
     candidate_members = SqlCandidate(db)
 
     try:
@@ -45,7 +47,9 @@ async def get_candidate_vector(candidate_id: int, db: AsyncSession = Depends(get
     candidate_members = SqlCandidate(db)
     try:
         candidate = await candidate_members.get(id_key=candidate_id)
-        embeddings_hard = qdrant_api.retrieve(QdrantCollection.CANDIDATES_HARD.value, [str(candidate.user_id)])
+        embeddings_hard = qdrant_api.retrieve(
+            QdrantCollection.CANDIDATES_HARD.value, [str(candidate.user_id)]
+        )
         return embeddings_hard
     except Exception as e:
         logger.error(f"Error getting candidate: {e}")

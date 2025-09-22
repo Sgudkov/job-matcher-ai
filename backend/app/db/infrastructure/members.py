@@ -19,7 +19,7 @@ class SqlCandidate(CandidateMembers):
             email=candidate.email,
             phone=candidate.phone,
             soft_skill=candidate.soft_skill,
-            hard_skill=candidate.hard_skill
+            hard_skill=candidate.hard_skill,
         )
 
         self.session.add(candidate_orm)
@@ -36,7 +36,7 @@ class SqlCandidate(CandidateMembers):
             email=candidate_orm.email,
             phone=candidate_orm.phone,
             soft_skill=candidate_orm.soft_skill,
-            hard_skill=candidate_orm.hard_skill
+            hard_skill=candidate_orm.hard_skill,
         )
 
     async def get_all(self) -> list[Candidate]:
@@ -44,13 +44,16 @@ class SqlCandidate(CandidateMembers):
         candidates_orm = await self.session.execute(stmt)
         if candidates_orm is None:
             raise ValueError("""Candidates not found""")
-        return [Candidate(
-            user_id=UUID(str(candidate_orm.user_id)),
-            first_name=candidate_orm.first_name,
-            last_name=candidate_orm.last_name,
-            email=candidate_orm.email,
-            phone=candidate_orm.phone
-        ) for candidate_orm in candidates_orm.scalars().all()]
+        return [
+            Candidate(
+                user_id=UUID(str(candidate_orm.user_id)),
+                first_name=candidate_orm.first_name,
+                last_name=candidate_orm.last_name,
+                email=candidate_orm.email,
+                phone=candidate_orm.phone,
+            )
+            for candidate_orm in candidates_orm.scalars().all()
+        ]
 
 
 class SqlEmployer(EmployerMembers):
@@ -64,7 +67,7 @@ class SqlEmployer(EmployerMembers):
             email=employer.email,
             phone=employer.phone,
             soft_skill=employer.soft_skill,
-            hard_skill=employer.hard_skill
+            hard_skill=employer.hard_skill,
         )
 
         self.session.add(employer_orm)
@@ -79,17 +82,20 @@ class SqlEmployer(EmployerMembers):
             email=employer_orm.email,
             phone=employer_orm.phone,
             hard_skill=employer_orm.hard_skill,
-            soft_skill=employer_orm.soft_skill
+            soft_skill=employer_orm.soft_skill,
         )
 
     async def get_all(self) -> list[Employer]:
         stmt = select(EmployerORM)
         employers_orm = await self.session.execute(stmt)
-        return [Employer(
-            first_name=employer_orm.first_name,
-            last_name=employer_orm.last_name,
-            email=employer_orm.email,
-            phone=employer_orm.phone,
-            hard_skill=employer_orm.hard_skill,
-            soft_skill=employer_orm.soft_skill
-        ) for employer_orm in employers_orm.scalars().all()]
+        return [
+            Employer(
+                first_name=employer_orm.first_name,
+                last_name=employer_orm.last_name,
+                email=employer_orm.email,
+                phone=employer_orm.phone,
+                hard_skill=employer_orm.hard_skill,
+                soft_skill=employer_orm.soft_skill,
+            )
+            for employer_orm in employers_orm.scalars().all()
+        ]

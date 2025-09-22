@@ -21,14 +21,12 @@ engine = create_async_engine(
     echo=True,  # Логирование SQL запросов
     future=True,
     pool_size=20,
-    max_overflow=0
+    max_overflow=0,
 )
 
 # Асинхронная сессия
 AsyncSessionLocal = async_sessionmaker(
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=False
+    bind=engine, class_=AsyncSession, expire_on_commit=False
 )
 
 
@@ -55,18 +53,21 @@ class QdrantAPI:
             points=vectors,
         )
 
-    def search(self, collection_name: str, vector: Tensor | ndarray | dict[str, Tensor], limit: int):
+    def search(
+        self,
+        collection_name: str,
+        vector: Tensor | ndarray | dict[str, Tensor],
+        limit: int,
+    ):
         return self.client.query_points(
-            collection_name=collection_name,
-            query=vector,
-            limit=limit
+            collection_name=collection_name, query=vector, limit=limit
         )
 
-    def retrieve(self, collection_name: str, member_uuid: list[int | str]) -> list[Record]:
+    def retrieve(
+        self, collection_name: str, member_uuid: list[int | str]
+    ) -> list[Record]:
         return self.client.retrieve(
-            collection_name=collection_name,
-            ids=member_uuid,
-            with_vectors=True
+            collection_name=collection_name, ids=member_uuid, with_vectors=True
         )
 
 
