@@ -85,4 +85,4 @@ class MembersEmbeddingSystem:
         return np.mean(chunk_embeddings, axis=0)
 
 
-candidate_embedding_system = MembersEmbeddingSystem()
+members_embedding_system = MembersEmbeddingSystem()

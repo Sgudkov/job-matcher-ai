@@ -19,6 +19,6 @@ class Employer:
     first_name: str = ""
     last_name: str = ""
     email: str = ""
-    phone: str = ""
+    phone: int = 0
     hard_skill: str = ""
     soft_skill: str = ""

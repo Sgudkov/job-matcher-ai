@@ -9,15 +9,15 @@ from qdrant_client.models import PointStruct
 class CandidateBase(BaseModel):
     id: int = 0
     user_id: UUID = field(default_factory=uuid4)
-    first_name: str = ""
-    last_name: str = ""
-    email: str = ""
-    phone: int = 0
-    hard_skill: str = ""
-    soft_skill: str = ""
+    first_name: str
+    last_name: str
+    email: str
+    phone: int
+    hard_skill: str
+    soft_skill: str
 
 
-class CandidateEmbedding(CandidateBase):
+class CandidateEmbedding(BaseModel):
     embedding_soft: list[PointStruct] = field(default_factory=list)
     embedding_hard: list[PointStruct] = field(default_factory=list)
 

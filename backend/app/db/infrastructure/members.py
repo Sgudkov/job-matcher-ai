@@ -17,7 +17,7 @@ class SqlCandidate(CandidateMembers):
             first_name=candidate.first_name,
             last_name=candidate.last_name,
             email=candidate.email,
-            phone=str(candidate.phone),
+            phone=candidate.phone,
             soft_skill=candidate.soft_skill,
             hard_skill=candidate.hard_skill
         )
@@ -31,12 +31,12 @@ class SqlCandidate(CandidateMembers):
             raise ValueError(f"Candidate with id {id_key} not found")
         return Candidate(
             user_id=UUID(str(candidate_orm.user_id)),
-            first_name=str(candidate_orm.first_name),
-            last_name=str(candidate_orm.last_name),
-            email=str(candidate_orm.email),
-            phone=str(candidate_orm.phone),
-            soft_skill=str(candidate_orm.soft_skill),
-            hard_skill=str(candidate_orm.hard_skill)
+            first_name=candidate_orm.first_name,
+            last_name=candidate_orm.last_name,
+            email=candidate_orm.email,
+            phone=candidate_orm.phone,
+            soft_skill=candidate_orm.soft_skill,
+            hard_skill=candidate_orm.hard_skill
         )
 
     async def get_all(self) -> list[Candidate]:
@@ -46,10 +46,10 @@ class SqlCandidate(CandidateMembers):
             raise ValueError("""Candidates not found""")
         return [Candidate(
             user_id=UUID(str(candidate_orm.user_id)),
-            first_name=str(candidate_orm.first_name),
-            last_name=str(candidate_orm.last_name),
-            email=str(candidate_orm.email),
-            phone=str(candidate_orm.phone)
+            first_name=candidate_orm.first_name,
+            last_name=candidate_orm.last_name,
+            email=candidate_orm.email,
+            phone=candidate_orm.phone
         ) for candidate_orm in candidates_orm.scalars().all()]
 
 
@@ -57,7 +57,7 @@ class SqlEmployer(EmployerMembers):
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def add(self, employer: Employer):
+    async def add(self, employer: Employer) -> EmployerORM:
         employer_orm = EmployerORM(
             first_name=employer.first_name,
             last_name=employer.last_name,
@@ -68,19 +68,28 @@ class SqlEmployer(EmployerMembers):
         )
 
         self.session.add(employer_orm)
-
-    async def get(self, employer_id: int):
-        employer_orm = await self.session.get(EmployerORM, employer_id)
         return employer_orm
+
+    async def get(self, id_key: int) -> Employer:
+        employer_orm = await self.session.get(EmployerORM, id_key)
+        return Employer(
+            user_id=UUID(str(employer_orm.employer_id)),
+            first_name=employer_orm.first_name,
+            last_name=employer_orm.last_name,
+            email=employer_orm.email,
+            phone=employer_orm.phone,
+            hard_skill=employer_orm.hard_skill,
+            soft_skill=employer_orm.soft_skill
+        )
 
     async def get_all(self) -> list[Employer]:
         stmt = select(EmployerORM)
         employers_orm = await self.session.execute(stmt)
         return [Employer(
-            first_name=str(employer_orm.first_name),
-            last_name=str(employer_orm.last_name),
-            email=str(employer_orm.email),
-            phone=str(employer_orm.phone),
-            hard_skill=str(employer_orm.hard_skill),
-            soft_skill=str(employer_orm.soft_skill)
+            first_name=employer_orm.first_name,
+            last_name=employer_orm.last_name,
+            email=employer_orm.email,
+            phone=employer_orm.phone,
+            hard_skill=employer_orm.hard_skill,
+            soft_skill=employer_orm.soft_skill
         ) for employer_orm in employers_orm.scalars().all()]

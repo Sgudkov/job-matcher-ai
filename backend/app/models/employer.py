@@ -8,15 +8,15 @@ from qdrant_client.http.models import PointStruct
 class EmployerBase(BaseModel):
     id: int = 0
     employer_id: UUID = field(default_factory=uuid4)
-    first_name: str = ""
-    last_name: str = ""
-    email: str = ""
-    phone: str = ""
-    hard_skill: str = ""
-    soft_skill: str = ""
+    first_name: str
+    last_name: str
+    email: str
+    phone: int
+    hard_skill: str
+    soft_skill: str
 
 
-class EmployerEmbedding(EmployerBase):
+class EmployerEmbedding(BaseModel):
     embedding_soft: list[PointStruct] = field(default_factory=list)
     embedding_hard: list[PointStruct] = field(default_factory=list)
 
