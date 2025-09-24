@@ -2,6 +2,7 @@
 from enum import Enum
 
 from pydantic_settings import BaseSettings
+from sentence_transformers import SentenceTransformer
 
 
 class QdrantCollection(Enum):
@@ -14,6 +15,10 @@ class MembersDataType(Enum):
     EMPLOYER = "employer"
     HARD_SKILL = "hard_skill"
     SOFT_SKILL = "soft_skill"
+
+
+SOFT_MODEL = SentenceTransformer("ai-forever/ru-en-RoSBERTa")
+HARD_MODEL = SentenceTransformer("sentence-transformers/multi-qa-MiniLM-L6-cos-v1")
 
 
 class Settings(BaseSettings):

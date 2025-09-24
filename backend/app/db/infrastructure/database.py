@@ -9,6 +9,7 @@ from qdrant_client.http.models import (
     Distance,
     PointStruct,
     Record,
+    models,
 )
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from torch import Tensor
@@ -82,6 +83,18 @@ class QdrantAPI:
     ) -> list[Record]:
         return self.client.retrieve(
             collection_name=collection_name, ids=member_uuid, with_vectors=True
+        )
+
+    def remove_points(self, collection_name: str, **kwargs):
+        must = []
+        args = kwargs.get("kwargs", {})
+        for key, value in args.items():
+            must.append(
+                models.FieldCondition(key=key, match=models.MatchValue(value=value))
+            )
+        self.client.delete(
+            collection_name=collection_name,
+            points_selector=models.FilterSelector(filter=models.Filter(must=must)),
         )
 
 

@@ -1,0 +1,502 @@
+[
+  {
+    "id": 1,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Алексей",
+    "last_name": "Петров",
+    "email": "aleksey.petrov@mail.ru",
+    "phone": 79161234567,
+    "hard_skill": "Python, Django, PostgreSQL, Docker, Redis",
+    "soft_skill": "Оптимизировал производительность API на 40% через кэширование и асинхронные задачи. Внедрил систему мониторинга, которая снизила время простоя на 70%. Реорганизовал legacy-код, улучшив поддерживаемость кодовой базы"
+  },
+  {
+    "id": 2,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Мария",
+    "last_name": "Иванова",
+    "email": "maria.ivanova@gmail.com",
+    "phone": 79262345678,
+    "hard_skill": "Java, Spring Boot, Hibernate, MySQL, Maven",
+    "soft_skill": "Разработала микросервисную архитектуру с нуля, сократив время разработки новых функций на 60%. Провела миграцию с монолита на микросервисы без downtime. Настроила CI/CD pipeline, автоматизировав 90% процессов тестирования"
+  },
+  {
+    "id": 3,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Дмитрий",
+    "last_name": "Сидоров",
+    "email": "dmitry.sidorov@yandex.ru",
+    "phone": 79373456789,
+    "hard_skill": "Node.js, Express, MongoDB, AWS, TypeScript",
+    "soft_skill": "Создал систему реального времени для 10k+ concurrent пользователей. Оптимизировал запросы к БД, снизив latency с 200ms до 50ms. Разработал архитектуру, которая масштабируется горизонтально под нагрузку"
+  },
+  {
+    "id": 4,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Екатерина",
+    "last_name": "Козлова",
+    "email": "ekaterina.koz@gmail.com",
+    "phone": 79484567890,
+    "hard_skill": "C#, .NET Core, SQL Server, Azure, Entity Framework",
+    "soft_skill": "Мигрировала систему с .NET Framework на .NET Core, улучшив производительность на 35%. Внедрила DDD подход, что сократило количество багов на 50%. Разработала систему кэширования, обрабатывающую 1M+ запросов в день"
+  },
+  {
+    "id": 5,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Сергей",
+    "last_name": "Васильев",
+    "email": "sergey.vas@mail.ru",
+    "phone": 79595678901,
+    "hard_skill": "Go, Gin, PostgreSQL, Kubernetes, gRPC",
+    "soft_skill": "Построил высоконагруженный API с обработкой 5000 RPS. Реализовал graceful shutdown и circuit breaker patterns. Снизил потребление памяти на 40% через оптимизацию аллокаций"
+  },
+  {
+    "id": 6,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Анна",
+    "last_name": "Николаева",
+    "email": "anna.nikolaeva@yandex.ru",
+    "phone": 79606789012,
+    "hard_skill": "Ruby on Rails, PostgreSQL, Sidekiq, Redis, RSpec",
+    "soft_skill": "Рефакторинг монолита с 200k строк кода, выделив 15 независимых модулей. Внедрила background jobs систему, обрабатывающую 100k задач в день. Создала comprehensive test coverage на 95%"
+  },
+  {
+    "id": 7,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Павел",
+    "last_name": "Кузнецов",
+    "email": "pavel.kuzn@gmail.com",
+    "phone": 79717890123,
+    "hard_skill": "PHP, Laravel, MySQL, Docker, Elasticsearch",
+    "soft_skill": "Разработал поисковую систему с полнотекстовым поиском для 5M+ документов. Оптимизировал запросы, снизив время ответа с 2s до 200ms. Внедрил кэширование на уровне приложения и БД"
+  },
+  {
+    "id": 8,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Ольга",
+    "last_name": "Смирнова",
+    "email": "olga.smirn@mail.ru",
+    "phone": 79828901234,
+    "hard_skill": "Python, FastAPI, MongoDB, Docker, Celery",
+    "soft_skill": "Создала систему обработки данных в реальном времени для IoT устройств. Обрабатывает 1M+ событий в день с гарантированной доставкой. Реализовала механизм retry и dead letter queues"
+  },
+  {
+    "id": 9,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Иван",
+    "last_name": "Попов",
+    "email": "ivan.popov@gmail.com",
+    "phone": 79939012345,
+    "hard_skill": "Java, Micronaut, Cassandra, Kafka, Gradle",
+    "soft_skill": "Построил event-driven архитектуру для финансовых транзакций. Обеспечил exactly-once семантику обработки сообщений. Реализовал distributed tracing для мониторинга микросервисов"
+  },
+  {
+    "id": 10,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Наталья",
+    "last_name": "Федорова",
+    "email": "natalia.fedor@yandex.ru",
+    "phone": 79040123456,
+    "hard_skill": "Node.js, NestJS, TypeORM, Redis, RabbitMQ",
+    "soft_skill": "Разработала систему уведомлений с multi-channel delivery (email, sms, push). Обрабатывает 500k+ уведомлений ежедневно. Реализовала A/B testing платформу для маркетинговых кампаний"
+  },
+  {
+    "id": 11,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Михаил",
+    "last_name": "Орлов",
+    "email": "mikhail.orlov@mail.ru",
+    "phone": 79151234567,
+    "hard_skill": "Python, Flask, SQLAlchemy, PostgreSQL, AWS Lambda",
+    "soft_skill": "Мигрировал монолит на serverless архитектуру, сократив costs на 70%. Реализовал auto-scaling под нагрузку. Создал систему мониторинга и алертинга на CloudWatch"
+  },
+  {
+    "id": 12,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Елена",
+    "last_name": "Белова",
+    "email": "elena.belova@gmail.com",
+    "phone": 79262345678,
+    "hard_skill": "C#, ASP.NET, Entity Framework, SQL Server, Azure Functions",
+    "soft_skill": "Разработала систему документооборота с workflow engine. Автоматизировала 80% ручных процессов. Внедрила электронную подпись и аудит изменений"
+  },
+  {
+    "id": 13,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Андрей",
+    "last_name": "Комаров",
+    "email": "andrey.komarov@yandex.ru",
+    "phone": 79373456789,
+    "hard_skill": "Go, Echo, MySQL, Docker, Prometheus",
+    "soft_skill": "Построил high-frequency trading систему с latency <1ms. Реализовал custom protocol для низкоуровневой коммуникации. Оптимизировал garbage collection паузы"
+  },
+  {
+    "id": 14,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Светлана",
+    "last_name": "Волкова",
+    "email": "svetlana.volk@mail.ru",
+    "phone": 79484567890,
+    "hard_skill": "Ruby, Sinatra, PostgreSQL, Sidekiq, Redis",
+    "soft_skill": "Создала API gateway для 50+ микросервисов. Реализовала rate limiting, authentication и request routing. Снизила нагрузку на backend services на 60%"
+  },
+  {
+    "id": 15,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Артем",
+    "last_name": "Лебедев",
+    "email": "artem.lebedev@gmail.com",
+    "phone": 79595678901,
+    "hard_skill": "PHP, Symfony, Doctrine, MySQL, Vue.js",
+    "soft_skill": "Разработал CRM систему с real-time analytics. Интегрировал 10+ внешних API. Создал reporting dashboard с интерактивными графиками"
+  },
+  {
+    "id": 16,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Юлия",
+    "last_name": "Семенова",
+    "email": "yulia.semen@yandex.ru",
+    "phone": 79606789012,
+    "hard_skill": "Python, Django REST, Celery, Redis, Nginx",
+    "soft_skill": "Построила образовательную платформу с video streaming и интерактивными заданиями. Реализовала progress tracking и adaptive learning algorithms"
+  },
+  {
+    "id": 17,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Денис",
+    "last_name": "Егоров",
+    "email": "denis.egorov@mail.ru",
+    "phone": 79717890123,
+    "hard_skill": "Java, Spring Cloud, MongoDB, Kafka, Docker",
+    "soft_skill": "Создал distributed cache систему с consistency guarantees. Реализовал cache invalidation strategies. Достиг 99.9% cache hit rate"
+  },
+  {
+    "id": 18,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Алина",
+    "last_name": "Павлова",
+    "email": "alina.pavlova@gmail.com",
+    "phone": 79828901234,
+    "hard_skill": "Node.js, Express, TypeScript, GraphQL, PostgreSQL",
+    "soft_skill": "Разработала GraphQL API с query complexity analysis и depth limiting. Оптимизировала N+1 queries через dataloader pattern. Снизила количество запросов на 70%"
+  },
+  {
+    "id": 19,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Роман",
+    "last_name": "Степанов",
+    "email": "roman.stepan@yandex.ru",
+    "phone": 79939012345,
+    "hard_skill": "C#, .NET 6, Dapper, SQL Server, Azure",
+    "soft_skill": "Мигрировал legacy WCF services на gRPC. Увеличил throughput на 300%. Реализовал health checks и circuit breakers"
+  },
+  {
+    "id": 20,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Виктория",
+    "last_name": "Григорьева",
+    "email": "vika.grig@mail.ru",
+    "phone": 79040123456,
+    "hard_skill": "Python, FastAPI, SQLModel, Alembic, Pytest",
+    "soft_skill": "Создала high-load API для мобильного приложения с 1M+ пользователей. Реализовала rate limiting и request throttling. Настроила comprehensive logging и error tracking"
+  },
+  {
+    "id": 21,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Александр",
+    "last_name": "Романов",
+    "email": "alex.romanov@gmail.com",
+    "phone": 79151234567,
+    "hard_skill": "Go, Fiber, GORM, PostgreSQL, Redis",
+    "soft_skill": "Разработал систему обработки платежей с PCI DSS compliance. Реализовал idempotent API и duplicate detection. Интегрировал 5+ payment gateways"
+  },
+  {
+    "id": 22,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Ксения",
+    "last_name": "Киселева",
+    "email": "ksenia.kis@yandex.ru",
+    "phone": 79262345678,
+    "hard_skill": "Ruby on Rails, Hotwire, PostgreSQL, Redis, RSpec",
+    "soft_skill": "Построила real-time collaboration platform с WebSockets. Реализовала operational transformation для concurrent editing. Обеспечила conflict resolution algorithms"
+  },
+  {
+    "id": 23,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Владимир",
+    "last_name": "Морозов",
+    "email": "vlad.moroz@mail.ru",
+    "phone": 79373456789,
+    "hard_skill": "PHP, Laravel, Livewire, MySQL, Elasticsearch",
+    "soft_skill": "Создал e-commerce platform с recommendation engine. Увеличил conversion rate на 25%. Реализовал personalization algorithms на основе user behavior"
+  },
+  {
+    "id": 24,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Татьяна",
+    "last_name": "Зайцева",
+    "email": "tanya.zayt@gmail.com",
+    "phone": 79484567890,
+    "hard_skill": "Java, Quarkus, Panache, MongoDB, GraalVM",
+    "soft_skill": "Оптимизировала cold start time микросервисов с 3s до 300ms через native compilation. Снизила memory usage на 60%. Ускорила deployment process"
+  },
+  {
+    "id": 25,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Григорий",
+    "last_name": "Соловьев",
+    "email": "grisha.sol@yandex.ru",
+    "phone": 79595678901,
+    "hard_skill": "Python, Django, Django Channels, Redis, WebSockets",
+    "soft_skill": "Разработал chat platform с end-to-end encryption. Реализовал message queue для guaranteed delivery. Обеспечил scalability до 100k concurrent connections"
+  },
+  {
+    "id": 26,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Марина",
+    "last_name": "Воробьева",
+    "email": "marina.vorob@mail.ru",
+    "phone": 79606789012,
+    "hard_skill": "Node.js, NestJS, Prisma, MySQL, Jest",
+    "soft_skill": "Создала microfrontends architecture с module federation. Уменьшила bundle size на 40%. Реализовала lazy loading и code splitting"
+  },
+  {
+    "id": 27,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Никита",
+    "last_name": "Фролов",
+    "email": "nikita.frolov@gmail.com",
+    "phone": 79717890123,
+    "hard_skill": "C#, Blazor, SignalR, SQL Server, Entity Framework",
+    "soft_skill": "Разработал real-time dashboard для IoT data visualization. Обрабатывает 10k+ events per second. Реализовал predictive maintenance algorithms"
+  },
+  {
+    "id": 28,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Евгения",
+    "last_name": "Андреева",
+    "email": "evgenia.andreeva@yandex.ru",
+    "phone": 79828901234,
+    "hard_skill": "Python, Scrapy, BeautifulSoup, Pandas, PostgreSQL",
+    "soft_skill": "Построила data pipeline для web scraping 1000+ websites. Обрабатывает 10GB данных ежедневно. Реализовала distributed crawling с rate limiting"
+  },
+  {
+    "id": 29,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Константин",
+    "last_name": "Макаров",
+    "email": "kostya.makar@mail.ru",
+    "phone": 79939012345,
+    "hard_skill": "Go, Gin, GORM, Redis, Docker Compose",
+    "soft_skill": "Создал API для геолокационных сервисов с spatial queries. Оптимизировал proximity search алгоритмы. Достиг response time <100ms для 1M+ точек"
+  },
+  {
+    "id": 30,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Людмила",
+    "last_name": "Орлова",
+    "email": "lyudmila.orlova@gmail.com",
+    "phone": 79040123456,
+    "hard_skill": "Ruby, Hanami, ROM, PostgreSQL, Dry-rb",
+    "soft_skill": "Рефакторинг legacy codebase с внедрением clean architecture. Уменьшил coupling на 70%. Улучшил testability и maintainability"
+  },
+  {
+    "id": 31,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Станислав",
+    "last_name": "Борисов",
+    "email": "stas.borisov@yandex.ru",
+    "phone": 79151234567,
+    "hard_skill": "PHP, Yii2, Redis, MySQL, Elasticsearch",
+    "soft_skill": "Разработал high-load social network API. Реализовал news feed algorithm. Обрабатывает 5000+ requests per second с кэшированием"
+  },
+  {
+    "id": 32,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Валерия",
+    "last_name": "Медведева",
+    "email": "lera.medved@mail.ru",
+    "phone": 79262345678,
+    "hard_skill": "Python, Sanic, AsyncIO, MongoDB, Motor",
+    "soft_skill": "Построила async microservices architecture. Достиг throughput 10k RPS на одном инстансе. Реализовала connection pooling и async database drivers"
+  },
+  {
+    "id": 33,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Артур",
+    "last_name": "Крылов",
+    "email": "artur.krylov@gmail.com",
+    "phone": 79373456789,
+    "hard_skill": "Java, Vert.x, Reactive, MongoDB, Redis",
+    "soft_skill": "Создал reactive streaming platform для video processing. Обрабатывает 100GB видео ежедневно. Реализовал parallel processing с backpressure control"
+  },
+  {
+    "id": 34,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Инна",
+    "last_name": "Тихонова",
+    "email": "inna.tikhonova@yandex.ru",
+    "phone": 79484567890,
+    "hard_skill": "Node.js, Express, Sequelize, MySQL, JWT",
+    "soft_skill": "Разработала multi-tenant SaaS platform. Реализовала data isolation на уровне базы данных. Создала admin panel для tenant management"
+  },
+  {
+    "id": 35,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Георгий",
+    "last_name": "Давыдов",
+    "email": "georgiy.davydov@mail.ru",
+    "phone": 79595678901,
+    "hard_skill": "C#, .NET Core, DDD, CQRS, Event Sourcing",
+    "soft_skill": "Построил event-sourced system для audit trail. Реализовал event replay и snapshotting. Обеспечил temporal queries для historical data"
+  },
+  {
+    "id": 36,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Ангелина",
+    "last_name": "Субботина",
+    "email": "angelina.sub@gmail.com",
+    "phone": 79606789012,
+    "hard_skill": "Python, Pyramid, SQLAlchemy, Celery, Redis",
+    "soft_skill": "Мигрировала монолит на microservices без downtime. Реализовала blue-green deployment. Снизила deployment risk на 90%"
+  },
+  {
+    "id": 37,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Вадим",
+    "last_name": "Калинин",
+    "email": "vadim.kalinin@yandex.ru",
+    "phone": 79717890123,
+    "hard_skill": "Go, Chi, pgx, PostgreSQL, Docker",
+    "soft_skill": "Создал distributed lock system для coordination между микросервисами. Реализовал leader election и distributed consensus"
+  },
+  {
+    "id": 38,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Элина",
+    "last_name": "Гусева",
+    "email": "elina.guseva@mail.ru",
+    "phone": 79828901234,
+    "hard_skill": "Ruby, Rails API, GraphQL, PostgreSQL, Redis",
+    "soft_skill": "Разработала API versioning strategy с backward compatibility. Реализовала deprecation policies и migration tools"
+  },
+  {
+    "id": 39,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Игорь",
+    "last_name": "Виноградов",
+    "email": "igor.vinograd@gmail.com",
+    "phone": 79939012345,
+    "hard_skill": "PHP, Symfony, API Platform, MySQL, Varnish",
+    "soft_skill": "Построил high-performance API с HTTP caching. Достиг cache hit ratio 95%. Реализовал cache invalidation на основе events"
+  },
+  {
+    "id": 40,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Диана",
+    "last_name": "Павлова",
+    "email": "diana.pavlova@yandex.ru",
+    "phone": 79040123456,
+    "hard_skill": "Python, FastAPI, Pydantic, SQLModel, pytest",
+    "soft_skill": "Создала data validation framework с custom types. Уменьшила количество data-related bugs на 80%. Реализовала schema migration tools"
+  },
+  {
+    "id": 41,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Руслан",
+    "last_name": "Шестаков",
+    "email": "ruslan.shestak@mail.ru",
+    "phone": 79151234567,
+    "hard_skill": "Java, Spring Security, OAuth2, JWT, Keycloak",
+    "soft_skill": "Разработал identity and access management систему. Реализовал multi-factor authentication. Интегрировал SSO с 10+ identity providers"
+  },
+  {
+    "id": 42,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Алла",
+    "last_name": "Михеева",
+    "email": "alla.mikheeva@gmail.com",
+    "phone": 79262345678,
+    "hard_skill": "Node.js, NestJS, TypeORM, MySQL, Redis",
+    "soft_skill": "Построила workflow engine для business process automation. Реализовала state machines и decision tables. Автоматизировала 50+ бизнес-процессов"
+  },
+  {
+    "id": 43,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Тимур",
+    "last_name": "Носков",
+    "email": "timur.noskov@yandex.ru",
+    "phone": 79373456789,
+    "hard_skill": "C#, ASP.NET Core, gRPC, Protobuf, SQL Server",
+    "soft_skill": "Создал high-performance gRPC services для internal communication. Уменьшил network overhead на 60%. Реализовал service discovery и load balancing"
+  },
+  {
+    "id": 44,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Яна",
+    "last_name": "Ларина",
+    "email": "yana.larina@mail.ru",
+    "phone": 79484567890,
+    "hard_skill": "Python, Django, Django REST, PostgreSQL, Docker",
+    "soft_skill": "Разработала multi-language CMS с WYSIWYG editor. Реализовала content versioning и workflow approval. Интегрировала CDN для static assets"
+  },
+  {
+    "id": 45,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Вячеслав",
+    "last_name": "Горбунов",
+    "email": "slava.gorbunov@gmail.com",
+    "phone": 79595678901,
+    "hard_skill": "Go, Echo, GORM, MySQL, Prometheus",
+    "soft_skill": "Построил observability stack с metrics, logs и traces. Реализовал custom exporters для business metrics. Снизил MTTR на 70%"
+  },
+  {
+    "id": 46,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Кристина",
+    "last_name": "Ефимова",
+    "email": "kristina.efimova@yandex.ru",
+    "phone": 79606789012,
+    "hard_skill": "Ruby, Sinatra, Sequel, PostgreSQL, Rack",
+    "soft_skill": "Создала API gateway с plugin architecture. Реализовала middleware chain для request processing. Поддерживает 50+ custom plugins"
+  },
+  {
+    "id": 47,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Даниил",
+    "last_name": "Щербаков",
+    "email": "danil.shcherbak@mail.ru",
+    "phone": 79717890123,
+    "hard_skill": "PHP, Laravel, Octane, Swoole, MySQL",
+    "soft_skill": "Оптимизировал application performance через opcode caching и preloading. Достиг 5x improvement в request handling. Реализовал async task processing"
+  },
+  {
+    "id": 48,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Вероника",
+    "last_name": "Маркова",
+    "email": "veronika.markova@gmail.com",
+    "phone": 79828901234,
+    "hard_skill": "Python, Flask, SQLite, Docker, pytest",
+    "soft_skill": "Разработала MVP для стартапа за 2 месяца. Реализовала core features с iterative development. Собрала product-market fit feedback от 100+ users"
+  },
+  {
+    "id": 49,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Аркадий",
+    "last_name": "Блинов",
+    "email": "arkadiy.blinov@yandex.ru",
+    "phone": 79939012345,
+    "hard_skill": "Java, Spring Batch, Quartz, Oracle, Maven",
+    "soft_skill": "Создал data processing pipeline для ETL jobs. Обрабатывает 1TB данных ежедневно. Реализовал fault tolerance и restartability"
+  },
+  {
+    "id": 50,
+    "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Лидия",
+    "last_name": "Кузьмина",
+    "email": "lidia.kuzmina@mail.ru",
+    "phone": 79040123456,
+    "hard_skill": "Node.js, Express, Mongoose, MongoDB, Jest",
+    "soft_skill": "Построила real-time analytics dashboard. Визуализирует 1M+ data points. Реализовала data aggregation pipelines и caching strategies"
+  }
+]

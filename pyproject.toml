@@ -37,6 +37,7 @@ module = [
     "routes.*",
     "services.*",
     "config.*",
+    "repositories.*",
 ]
 plugins = [
     "sqlalchemy.ext.mypy.plugin",

@@ -1,0 +1,502 @@
+[
+  {
+    "id": 1,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Андрей",
+    "last_name": "Смирнов",
+    "email": "andrey.smirnov@company.ru",
+    "phone": 79161234567,
+    "hard_skill": "Python, FastAPI, PostgreSQL, Redis, Docker, Kubernetes",
+    "soft_skill": "Разработка высоконагруженного API для мобильного приложения, оптимизация производительности, внедрение системы кэширования, обеспечение отказоустойчивости сервиса"
+  },
+  {
+    "id": 2,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Ольга",
+    "last_name": "Иванова",
+    "email": "olga.ivanova@fintech.com",
+    "phone": 79262345678,
+    "hard_skill": "Java, Spring Boot, Microservices, Kafka, PostgreSQL, AWS",
+    "soft_skill": "Разработка микросервисной архитектуры для процессинга платежей, обеспечение безопасности транзакций, реализация механизма идемпотентности API"
+  },
+  {
+    "id": 3,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Дмитрий",
+    "last_name": "Козлов",
+    "email": "dmitry.kozlov@bank.ru",
+    "phone": 79373456789,
+    "hard_skill": "C#, .NET Core, SQL Server, Entity Framework, Azure, Docker",
+    "soft_skill": "Миграция legacy-систем на современный стек технологий, разработка модуля онлайн-банкинга, обеспечение соответствия PCI DSS требованиям"
+  },
+  {
+    "id": 4,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Екатерина",
+    "last_name": "Петрова",
+    "email": "ekaterina.petrova@ecommerce.com",
+    "phone": 79484567890,
+    "hard_skill": "Node.js, TypeScript, NestJS, MongoDB, Redis, AWS Lambda",
+    "soft_skill": "Разработка системы рекомендаций товаров, оптимизация поискового движка, создание personalization engine на основе машинного обучения"
+  },
+  {
+    "id": 5,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Сергей",
+    "last_name": "Васильев",
+    "email": "sergey.vasilyev@gaming.com",
+    "phone": 79595678901,
+    "hard_skill": "Go, gRPC, PostgreSQL, Redis, Kubernetes, Prometheus",
+    "soft_skill": "Разработка real-time multiplayer серверов, оптимизация сетевого протокола, создание системы мониторинга производительности игровых сессий"
+  },
+  {
+    "id": 6,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Мария",
+    "last_name": "Николаева",
+    "email": "maria.nikolaeva@healthtech.com",
+    "phone": 79606789012,
+    "hard_skill": "Python, Django, Django REST, PostgreSQL, Celery, Docker",
+    "soft_skill": "Разработка платформы для телемедицины, обеспечение HIPAA compliance, создание системы видеоконференций с end-to-end encryption"
+  },
+  {
+    "id": 7,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Алексей",
+    "last_name": "Федоров",
+    "email": "aleksey.fedorov@logistics.com",
+    "phone": 79717890123,
+    "hard_skill": "Java, Spring Cloud, RabbitMQ, MySQL, Redis, Kubernetes",
+    "soft_skill": "Разработка системы управления логистическими цепями, оптимизация алгоритмов маршрутизации, интеграция с GPS-трекерами и API перевозчиков"
+  },
+  {
+    "id": 8,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Анна",
+    "last_name": "Семенова",
+    "email": "anna.semenova@edtech.com",
+    "phone": 79828901234,
+    "hard_skill": "Ruby on Rails, PostgreSQL, Sidekiq, Redis, AWS, Docker",
+    "soft_skill": "Разработка LMS платформы с системой проверки заданий, создание adaptive learning алгоритмов, интеграция с видеостриминговыми сервисами"
+  },
+  {
+    "id": 9,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Павел",
+    "last_name": "Михайлов",
+    "email": "pavel.mikhailov@iot.com",
+    "phone": 79939012345,
+    "hard_skill": "C++, Python, MQTT, PostgreSQL, TimescaleDB, Docker",
+    "soft_skill": "Разработка платформы для сбора и анализа данных с IoT устройств, создание системы predictive maintenance, оптимизация хранения временных рядов"
+  },
+  {
+    "id": 10,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Наталья",
+    "last_name": "Орлова",
+    "email": "natalia.orlova@saas.com",
+    "phone": 79040123456,
+    "hard_skill": "PHP, Laravel, MySQL, Redis, Vue.js, AWS",
+    "soft_skill": "Разработка multi-tenant CRM системы, создание модуля аналитики и отчетности, обеспечение изоляции данных между клиентами"
+  },
+  {
+    "id": 11,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Иван",
+    "last_name": "Кузнецов",
+    "email": "ivan.kuznetsov@travel.com",
+    "phone": 79151234567,
+    "hard_skill": "Python, Flask, MongoDB, Elasticsearch, Redis, Docker",
+    "soft_skill": "Разработка агрегатора туристических предложений, создание системы динамического ценообразования, интеграция с API авиакомпаний и отелей"
+  },
+  {
+    "id": 12,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Елена",
+    "last_name": "Попова",
+    "email": "elena.popova@media.com",
+    "phone": 79262345678,
+    "hard_skill": "Node.js, Express, MongoDB, Redis, AWS S3, FFmpeg",
+    "soft_skill": "Разработка платформы для видеостриминга, создание CDN инфраструктуры, оптимизация encoding pipeline для различных форматов видео"
+  },
+  {
+    "id": 13,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Максим",
+    "last_name": "Соколов",
+    "email": "maxim.sokolov@blockchain.com",
+    "phone": 79373456789,
+    "hard_skill": "Go, Blockchain, Smart Contracts, PostgreSQL, Docker, AWS",
+    "soft_skill": "Разработка DeFi платформы, создание механизма смарт-контрактов, обеспечение безопасности криптовалютных транзакций"
+  },
+  {
+    "id": 14,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Виктория",
+    "last_name": "Новикова",
+    "email": "viktoria.novikova@ai.com",
+    "phone": 79484567890,
+    "hard_skill": "Python, FastAPI, PyTorch, PostgreSQL, Redis, Docker",
+    "soft_skill": "Разработка ML pipeline для обработки естественного языка, создание API для AI моделей, оптимизация инференса для real-time приложений"
+  },
+  {
+    "id": 15,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Артем",
+    "last_name": "Волков",
+    "email": "artem.volkov@realestate.com",
+    "phone": 79595678901,
+    "hard_skill": "Java, Spring Boot, Hibernate, MySQL, Elasticsearch, Redis",
+    "soft_skill": "Разработка платформы для онлайн-бронирования недвижимости, создание системы управления бронированиями, интеграция с платежными системами"
+  },
+  {
+    "id": 16,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Светлана",
+    "last_name": "Романова",
+    "email": "svetlana.romanova@insurance.com",
+    "phone": 79606789012,
+    "hard_skill": "C#, .NET Core, SQL Server, Entity Framework, Azure, Docker",
+    "soft_skill": "Разработка системы автоматического андеррайтинга, создание модуля расчета страховых премий, интеграция с внешними данными о рисках"
+  },
+  {
+    "id": 17,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Константин",
+    "last_name": "Морозов",
+    "email": "konstantin.morozov@telecom.com",
+    "phone": 79717890123,
+    "hard_skill": "Python, Django, Celery, PostgreSQL, Redis, Nginx",
+    "soft_skill": "Разработка биллинговой системы для телеком-оператора, создание механизма тарификации услуг, обеспечение 24/7 доступности сервиса"
+  },
+  {
+    "id": 18,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Юлия",
+    "last_name": "Захарова",
+    "email": "yulia.zakharova@hrtech.com",
+    "phone": 79828901234,
+    "hard_skill": "Ruby on Rails, PostgreSQL, Sidekiq, Redis, React, AWS",
+    "soft_skill": "Разработка ATS системы для рекрутинга, создание алгоритмов matching кандидатов, интеграция с LinkedIn и job-порталами"
+  },
+  {
+    "id": 19,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Александр",
+    "last_name": "Белов",
+    "email": "alexander.belov@automotive.com",
+    "phone": 79939012345,
+    "hard_skill": "C++, Python, CAN bus, PostgreSQL, Docker, AWS IoT",
+    "soft_skill": "Разработка телематической платформы для connected cars, создание системы диагностики автомобилей, обработка данных с датчиков в реальном времени"
+  },
+  {
+    "id": 20,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Татьяна",
+    "last_name": "Ковалева",
+    "email": "tatyana.kovaleva@retail.com",
+    "phone": 79040123456,
+    "hard_skill": "Java, Spring Boot, Microservices, MongoDB, Kafka, Kubernetes",
+    "soft_skill": "Разработка omnichannel retail платформы, создание единой системы управления заказами, интеграция онлайн и офлайн каналов продаж"
+  },
+  {
+    "id": 21,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Роман",
+    "last_name": "Лебедев",
+    "email": "roman.lebedev@foodtech.com",
+    "phone": 79151234567,
+    "hard_skill": "Python, FastAPI, PostgreSQL, Redis, Docker, AWS",
+    "soft_skill": "Разработка платформы для доставки еды, оптимизация алгоритмов маршрутизации курьеров, создание системы управления ресторанами"
+  },
+  {
+    "id": 22,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Алина",
+    "last_name": "Степанова",
+    "email": "alina.stepanova@fitness.com",
+    "phone": 79262345678,
+    "hard_skill": "Node.js, NestJS, TypeORM, MySQL, Redis, Socket.io",
+    "soft_skill": "Разработка fitness tracking платформы, создание системы синхронизации данных с wearables, разработка social features для мотивации пользователей"
+  },
+  {
+    "id": 23,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Денис",
+    "last_name": "Григорьев",
+    "email": "denis.grigoriev@energy.com",
+    "phone": 79373456789,
+    "hard_skill": "Python, Django, Pandas, PostgreSQL, TimescaleDB, Grafana",
+    "soft_skill": "Разработка системы мониторинга энергопотребления, создание алгоритмов прогнозирования нагрузки, визуализация данных для аналитики"
+  },
+  {
+    "id": 24,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Любовь",
+    "last_name": "Титова",
+    "email": "lyubov.titova@legaltech.com",
+    "phone": 79484567890,
+    "hard_skill": "Python, Flask, SQLAlchemy, Elasticsearch, Redis, Docker",
+    "soft_skill": "Разработка платформы для анализа юридических документов, создание search engine для прецедентного права, автоматизация документооборота"
+  },
+  {
+    "id": 25,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Владимир",
+    "last_name": "Комаров",
+    "email": "vladimir.komarov@govtech.com",
+    "phone": 79595678901,
+    "hard_skill": "Java, Spring Boot, Oracle, Redis, Docker, Kubernetes",
+    "soft_skill": "Разработка государственной информационной системы, обеспечение безопасности данных, создание механизма электронной подписи документов"
+  },
+  {
+    "id": 26,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Евгения",
+    "last_name": "Фролова",
+    "email": "evgenia.frolova@adtech.com",
+    "phone": 79606789012,
+    "hard_skill": "Python, FastAPI, ClickHouse, Redis, Kafka, Docker",
+    "soft_skill": "Разработка real-time bidding платформы, создание системы аналитики рекламных кампаний, оптимизация алгоритмов таргетинга"
+  },
+  {
+    "id": 27,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Георгий",
+    "last_name": "Данилов",
+    "email": "georgiy.danilov@martech.com",
+    "phone": 79717890123,
+    "hard_skill": "PHP, Laravel, MySQL, Redis, Vue.js, AWS",
+    "soft_skill": "Разработка marketing automation платформы, создание системы email-рассылок, интеграция с CRM и аналитическими инструментами"
+  },
+  {
+    "id": 28,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Ксения",
+    "last_name": "Жукова",
+    "email": "ksenia.zhukova@healthcare.com",
+    "phone": 79828901234,
+    "hard_skill": "C#, .NET Core, SQL Server, Entity Framework, Azure, Docker",
+    "soft_skill": "Разработка электронной медицинской карты, обеспечение HIPAA compliance, создание системы обмена медицинскими данными между учреждениями"
+  },
+  {
+    "id": 29,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Никита",
+    "last_name": "Тарасов",
+    "email": "nikita.tarasov@fintech.com",
+    "phone": 79939012345,
+    "hard_skill": "Go, Microservices, PostgreSQL, Redis, gRPC, Kubernetes",
+    "soft_skill": "Разработка системы скоринга кредитных заявок, создание ML моделей для оценки рисков, интеграция с кредитными бюро"
+  },
+  {
+    "id": 30,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Валерия",
+    "last_name": "Борисова",
+    "email": "valeria.borisova@edtech.com",
+    "phone": 79040123456,
+    "hard_skill": "Python, Django, PostgreSQL, Celery, Redis, Docker",
+    "soft_skill": "Разработка платформы для онлайн-курсов, создание системы проверки домашних заданий, реализация механизма peer-to-peer ревью"
+  },
+  {
+    "id": 31,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Станислав",
+    "last_name": "Киселев",
+    "email": "stanislav.kiselev@iot.com",
+    "phone": 79151234567,
+    "hard_skill": "C++, Python, MQTT, InfluxDB, Grafana, Docker",
+    "soft_skill": "Разработка системы мониторинга промышленного оборудования, создание predictive maintenance алгоритмов, визуализация телеметрии"
+  },
+  {
+    "id": 32,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Ангелина",
+    "last_name": "Симонова",
+    "email": "angelina.simonova@social.com",
+    "phone": 79262345678,
+    "hard_skill": "Node.js, Express, MongoDB, Redis, Socket.io, AWS",
+    "soft_skill": "Разработка social media платформы, создание системы рекомендаций контента, модерация пользовательского контента с использованием AI"
+  },
+  {
+    "id": 33,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Вадим",
+    "last_name": "Филиппов",
+    "email": "vadim.filippov@gaming.com",
+    "phone": 79373456789,
+    "hard_skill": "C#, Unity, .NET Core, PostgreSQL, Redis, Docker",
+    "soft_skill": "Разработка backend для мобильной игры, создание системы внутриигровых покупок, античит защита и мониторинг игровых сессий"
+  },
+  {
+    "id": 34,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Эльвира",
+    "last_name": "Максимова",
+    "email": "elvira.maximova@realestate.com",
+    "phone": 79484567890,
+    "hard_skill": "Python, Flask, PostgreSQL, Elasticsearch, Redis, Docker",
+    "soft_skill": "Разработка платформы для управления коммерческой недвижимостью, создание системы бронирования помещений, автоматизация арендных процессов"
+  },
+  {
+    "id": 35,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Артур",
+    "last_name": "Новиков",
+    "email": "artur.novikov@transport.com",
+    "phone": 79595678901,
+    "hard_skill": "Java, Spring Boot, MySQL, Redis, Kafka, Kubernetes",
+    "soft_skill": "Разработка системы управления городским транспортом, оптимизация маршрутов в реальном времени, интеграция с GPS и пассажирскими счетчиками"
+  },
+  {
+    "id": 36,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Диана",
+    "last_name": "Осипова",
+    "email": "diana.osipova@healthtech.com",
+    "phone": 79606789012,
+    "hard_skill": "Python, FastAPI, MongoDB, Redis, Docker, AWS",
+    "soft_skill": "Разработка платформы для удаленного мониторинга пациентов, создание системы алертинга для критических показателей, интеграция с медицинскими устройствами"
+  },
+  {
+    "id": 37,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Руслан",
+    "last_name": "Егоров",
+    "email": "ruslan.egorov@fintech.com",
+    "phone": 79717890123,
+    "hard_skill": "Go, PostgreSQL, Redis, gRPC, Docker, Kubernetes",
+    "soft_skill": "Разработка high-frequency trading системы, создание low-latency API, оптимизация алгоритмов исполнения ордеров"
+  },
+  {
+    "id": 38,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Яна",
+    "last_name": "Сорокина",
+    "email": "yana.sorokina@edtech.com",
+    "phone": 79828901234,
+    "hard_skill": "Ruby on Rails, PostgreSQL, Sidekiq, Redis, React, AWS",
+    "soft_skill": "Разработка платформы для корпоративного обучения, создание системы оценки навыков сотрудников, интеграция с HR системами"
+  },
+  {
+    "id": 39,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Тимур",
+    "last_name": "Беляев",
+    "email": "timur.belyaev@iot.com",
+    "phone": 79939012345,
+    "hard_skill": "Python, Django, InfluxDB, Grafana, MQTT, Docker",
+    "soft_skill": "Разработка платформы для умного дома, создание системы автоматизации сценариев, интеграция с различными IoT устройствами и протоколами"
+  },
+  {
+    "id": 40,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Лидия",
+    "last_name": "Гордеева",
+    "email": "lidia.gordeeva@retail.com",
+    "phone": 79040123456,
+    "hard_skill": "PHP, Laravel, MySQL, Redis, Vue.js, AWS",
+    "soft_skill": "Разработка системы управления складскими запасами, создание алгоритмов прогнозирования спроса, интеграция с системами логистики"
+  },
+  {
+    "id": 41,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Вячеслав",
+    "last_name": "Тихонов",
+    "email": "vyacheslav.tikhonov@media.com",
+    "phone": 79151234567,
+    "hard_skill": "Python, FastAPI, PostgreSQL, Redis, Elasticsearch, Docker",
+    "soft_skill": "Разработка контентной платформы, создание системы рекомендаций статей, модерация пользовательского контента, SEO оптимизация"
+  },
+  {
+    "id": 42,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Кристина",
+    "last_name": "Куликова",
+    "email": "kristina.kulikova@travel.com",
+    "phone": 79262345678,
+    "hard_skill": "Node.js, NestJS, MongoDB, Redis, GraphQL, Docker",
+    "soft_skill": "Разработка системы бронирования авиабилетов, создание алгоритмов динамического ценообразования, интеграция с GDS системами"
+  },
+  {
+    "id": 43,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Даниил",
+    "last_name": "Савельев",
+    "email": "danil.savelyev@blockchain.com",
+    "phone": 79373456789,
+    "hard_skill": "Rust, Blockchain, Smart Contracts, PostgreSQL, Docker, AWS",
+    "soft_skill": "Разработка NFT marketplace, создание механизма minting токенов, обеспечение безопасности цифровых активов"
+  },
+  {
+    "id": 44,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Вероника",
+    "last_name": "Рябова",
+    "email": "veronika.ryabova@ai.com",
+    "phone": 79484567890,
+    "hard_skill": "Python, FastAPI, TensorFlow, PostgreSQL, Redis, Docker",
+    "soft_skill": "Разработка компьютерного зрения для распознавания объектов, создание API для image processing, оптимизация моделей для edge devices"
+  },
+  {
+    "id": 45,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Аркадий",
+    "last_name": "Медведев",
+    "email": "arkadiy.medvedev@govtech.com",
+    "phone": 79595678901,
+    "hard_skill": "Java, Spring Boot, Oracle, Redis, Docker, Kubernetes",
+    "soft_skill": "Разработка системы электронного голосования, обеспечение криптографической безопасности, создание механизма верификации результатов"
+  },
+  {
+    "id": 46,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Лилия",
+    "last_name": "Андреева",
+    "email": "lilia.andreeva@adtech.com",
+    "phone": 79606789012,
+    "hard_skill": "Python, Django, ClickHouse, Redis, Kafka, Docker",
+    "soft_skill": "Разработка DSP платформы для программатик рекламы, создание алгоритмов оптимизации рекламных бюджетов, аналитика эффективности кампаний"
+  },
+  {
+    "id": 47,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Глеб",
+    "last_name": "Зайцев",
+    "email": "gleb.zaytsev@martech.com",
+    "phone": 79717890123,
+    "hard_skill": "PHP, Symfony, MySQL, Redis, React, AWS",
+    "soft_skill": "Разработка CDP платформы, создание единого профиля клиента, интеграция с маркетинговыми каналами и аналитическими системами"
+  },
+  {
+    "id": 48,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Алла",
+    "last_name": "Ершова",
+    "email": "alla.ershova@healthcare.com",
+    "phone": 79828901234,
+    "hard_skill": "C#, .NET Core, SQL Server, Entity Framework, Azure, Docker",
+    "soft_skill": "Разработка телемедицинской платформы, создание системы онлайн-консультаций, интеграция с электронными медицинскими картами"
+  },
+  {
+    "id": 49,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Марат",
+    "last_name": "Щукин",
+    "email": "marat.shchukin@fintech.com",
+    "phone": 79939012345,
+    "hard_skill": "Go, Microservices, PostgreSQL, Redis, gRPC, Kubernetes",
+    "soft_skill": "Разработка P2P lending платформы, создание системы оценки заемщиков, автоматизация процессов кредитования и взыскания"
+  },
+  {
+    "id": 50,
+    "employer_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    "first_name": "Регина",
+    "last_name": "Лапина",
+    "email": "regina.lapina@edtech.com",
+    "phone": 79040123456,
+    "hard_skill": "Python, Django, PostgreSQL, Celery, Redis, Docker",
+    "soft_skill": "Разработка платформы для корпоративных тренингов, создание системы геймификации обучения, аналитика прогресса сотрудников"
+  }
+]
