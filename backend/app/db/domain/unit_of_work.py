@@ -1,13 +1,14 @@
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.db.domain.repositories import (
+from backend.app.db.infrastructure.repositories import (
     CandidateRepository,
     ResumeRepository,
     ResumeSkillRepository,
     EmployerRepository,
     VacancyRepository,
     VacancySkillRepository,
+    MatchRepository,
 )
 
 
@@ -21,6 +22,7 @@ class UnitOfWork:
         self.employers = EmployerRepository(session)
         self.vacancies = VacancyRepository(session)
         self.vacancy_skills = VacancySkillRepository(session)
+        self.matches = MatchRepository(session)
 
     @asynccontextmanager
     async def transaction(self):
@@ -30,3 +32,5 @@ class UnitOfWork:
         except Exception:
             await self.session.rollback()
             raise
+        finally:
+            await self.session.close()

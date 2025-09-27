@@ -35,9 +35,8 @@ async def create_employer(employer: EmployerCreate, db: AsyncSession = Depends(g
 async def get_employer(employer_id: int, db: AsyncSession = Depends(get_db)):
     try:
         uow = UnitOfWork(db)
-        async with uow.transaction():
-            employer = uow.employers.get(id_=employer_id)
-            return employer
+        employer = await uow.employers.get(id_=employer_id)
+        return employer
     except Exception as e:
         logger.error(f"Error getting employer: {e}")
         raise HTTPException(status_code=500, detail="Error getting employer")
@@ -47,9 +46,8 @@ async def get_employer(employer_id: int, db: AsyncSession = Depends(get_db)):
 async def get_employer_vector(employer_id: int, db: AsyncSession = Depends(get_db)):
     try:
         uow = UnitOfWork(db)
-        async with uow.transaction():
-            employer = uow.employers.get(id_=employer_id)
-            return employer
+        employer = await uow.employers.get(id_=employer_id)
+        return employer
     except Exception as e:
         logger.error(f"Error getting employer: {e}")
         raise HTTPException(status_code=500, detail="Error getting employer")

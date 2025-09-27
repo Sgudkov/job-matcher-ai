@@ -31,11 +31,16 @@ class MembersEmbeddingSystem:
                         MembersDataType.SOFT_SKILL.value: embedding_soft.tolist(),
                     },
                     payload={
-                        "type": MembersDataType.SOFT_SKILL.value,
+                        "type": MembersDataType.SOFT_SKILL.value.lower(),
                         "user_id": candidate.id,
                         "resume_id": resume.id,
-                        "summary": resume.summary,
+                        "summary": resume.summary.lower(),
                         "age": candidate.age,
+                        "location": resume.location.lower(),
+                        "salary_from": resume.salary_from,
+                        "salary_to": resume.salary_to,
+                        "employment_type": resume.employment_type.lower(),
+                        "experience_age": resume.experience_age,
                     },
                 )
             )
@@ -52,11 +57,11 @@ class MembersEmbeddingSystem:
                             MembersDataType.HARD_SKILL.value: embedding_hard.tolist(),
                         },
                         payload={
-                            "type": MembersDataType.HARD_SKILL.value,
+                            "type": MembersDataType.HARD_SKILL.value.lower(),
                             "user_id": candidate.id,
                             "resume_id": resume.id,
-                            "skill_name": skill.skill_name,
-                            "description": skill.description,
+                            "skill_name": skill.skill_name.lower(),
+                            "description": skill.description.lower(),
                         },
                     )
                 )
@@ -77,10 +82,16 @@ class MembersEmbeddingSystem:
                         MembersDataType.SOFT_SKILL.value: embedding_soft.tolist(),
                     },
                     payload={
-                        "type": MembersDataType.SOFT_SKILL.value,
+                        "type": MembersDataType.SOFT_SKILL.value.lower(),
                         "employer_id": employer.id,
                         "vacancy_id": vacancy.id,
-                        "description": vacancy.description,
+                        "description": vacancy.description.lower(),
+                        "experience_age_from": vacancy.experience_age_from,
+                        "experience_age_to": vacancy.experience_age_to,
+                        "location": vacancy.location.lower(),
+                        "salary_from": vacancy.salary_from,
+                        "salary_to": vacancy.salary_to,
+                        "employment_type": vacancy.employment_type.lower(),
                     },
                 )
             )
@@ -97,11 +108,11 @@ class MembersEmbeddingSystem:
                             MembersDataType.HARD_SKILL.value: embedding_hard.tolist(),
                         },
                         payload={
-                            "type": MembersDataType.HARD_SKILL.value,
+                            "type": MembersDataType.HARD_SKILL.value.lower(),
                             "employer_id": employer.id,
                             "vacancy_id": vacancy.id,
-                            "skill_name": skill.skill_name,
-                            "description": skill.description,
+                            "skill_name": skill.skill_name.lower(),
+                            "description": skill.description.lower(),
                         },
                     )
                 )

@@ -1,4 +1,16 @@
-from sqlalchemy import Column, String, Integer, Numeric, Text, ForeignKey
+from datetime import datetime
+
+from sqlalchemy import (
+    Column,
+    String,
+    Integer,
+    Numeric,
+    Text,
+    ForeignKey,
+    Float,
+    DateTime,
+    Boolean,
+)
 from sqlalchemy.orm import DeclarativeBase, relationship
 
 
@@ -25,6 +37,11 @@ class ResumeORM(Base):
     candidate_id = Column(Integer, ForeignKey("candidates.id", ondelete="CASCADE"))
     title = Column(String(100), nullable=False)  # например "Backend Developer"
     summary = Column(Text, nullable=True)  # soft skills описание
+    experience_age = Column(Integer, nullable=True)
+    location = Column(String(50), nullable=True)
+    salary_from = Column(Integer, nullable=True)
+    salary_to = Column(Integer, nullable=True)
+    employment_type = Column(String(50), nullable=True)
     candidate = relationship("CandidateORM", back_populates="resumes")
 
     # Связь: у резюме несколько hard skills
@@ -59,6 +76,12 @@ class VacancyORM(Base):
     employer_id = Column(Integer, ForeignKey("employers.id", ondelete="CASCADE"))
     title = Column(String(100), nullable=False)  # например "Middle Python Developer"
     description = Column(Text, nullable=True)  # soft skills / культура / команда
+    experience_age_from = Column(Integer, nullable=True)
+    experience_age_to = Column(Integer, nullable=True)
+    location = Column(String(50), nullable=True)
+    salary_from = Column(Integer, nullable=True)
+    salary_to = Column(Integer, nullable=True)
+    employment_type = Column(String(50), nullable=True)
     employer = relationship("EmployerORM", back_populates="vacancies")
 
     # Связь: у вакансии несколько требуемых hard skills
@@ -72,3 +95,30 @@ class VacancySkillORM(Base):
     skill_name = Column(String(50), nullable=False)
     description = Column(Text, nullable=True)  # уточнение, зачем нужен этот навык
     vacancy = relationship("VacancyORM", back_populates="skills")
+
+
+class MatchORM(Base):
+    __tablename__ = "matches"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    resume_id = Column(Integer, ForeignKey("resumes.id", ondelete="CASCADE"))
+    vacancy_id = Column(Integer, ForeignKey("vacancies.id", ondelete="CASCADE"))
+    score = Column(Float, nullable=True)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, default=datetime.now())
+    is_new = Column(Boolean, default=True)
+
+
+class FavoriteResumeORM(Base):
+    __tablename__ = "favorite_resumes"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("employers.id"))
+    resume_id = Column(Integer, ForeignKey("resumes.id"))
+    created_at = Column(DateTime, default=datetime.now())
+
+
+class FavoriteVacancyORM(Base):
+    __tablename__ = "favorite_vacancies"
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, ForeignKey("candidates.id"))
+    vacancy_id = Column(Integer, ForeignKey("vacancies.id"))
+    created_at = Column(DateTime, default=datetime.now())

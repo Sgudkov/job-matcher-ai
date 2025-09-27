@@ -16,6 +16,11 @@ class ResumeBase(BaseModel):
     candidate_id: int = 0
     title: str = ""
     summary: str = ""
+    experience_age: int = 0
+    location: str = ""
+    salary_from: int = 0
+    salary_to: int = 0
+    employment_type: str = ""
 
 
 class CandidateBase(BaseModel):
@@ -44,14 +49,20 @@ class CandidateCreate(BaseModel):
     phone: int
 
 
+class CandidateUpdate(CandidateCreate):
+    id: int
+
+
+class ResumeCreate(BaseModel):
+    candidate_id: int = 0
+    title: str = ""
+    summary: str = ""
+    experience_age: int = 0
+    location: str = ""
+    salary_from: int = 0
+    salary_to: int = 0
+    employment_type: str = ""
+
+
 class CandidateResumeUpsert(ResumeBase):
     pass
-
-
-class CandidateResponse(CandidateBase):
-    id: int
-    embedding_hard: List[float]
-    embedding_soft: List[float]
-
-    class Config:
-        from_attributes = True

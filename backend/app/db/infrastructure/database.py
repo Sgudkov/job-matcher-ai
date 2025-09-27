@@ -1,5 +1,6 @@
 import logging
 import os
+from typing import Any
 
 from dotenv import load_dotenv
 from numpy import ndarray
@@ -10,6 +11,7 @@ from qdrant_client.http.models import (
     PointStruct,
     Record,
     models,
+    Filter,
 )
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from torch import Tensor
@@ -30,6 +32,7 @@ engine = create_async_engine(
     future=True,
     pool_size=20,
     max_overflow=0,
+    pool_pre_ping=True,
 )
 
 # Асинхронная сессия
@@ -73,9 +76,37 @@ class QdrantAPI:
         collection_name: str,
         vector: Tensor | ndarray | dict[str, Tensor],
         limit: int,
+        **kwargs,
     ):
+        must = []
+        args = kwargs.get("kwargs", {})
+        for key, value in args.items():
+            must.append(
+                models.FieldCondition(key=key, match=models.MatchValue(value=value))
+            )
         return self.client.query_points(
-            collection_name=collection_name, query=vector, limit=limit
+            collection_name=collection_name,
+            query=vector,
+            limit=limit,
+            with_payload=True,
+            query_filter=Filter(must=must),
+        )
+
+    def scroll(
+        self, collection_name: str, limit: int, **kwargs
+    ) -> tuple[list[Record], int | str | None | Any]:
+        must: list = []
+        for key, value in kwargs.items():
+            must.append(
+                models.FieldCondition(key=key, match=models.MatchValue(value=value))
+            )
+
+        return self.client.scroll(
+            collection_name=collection_name,
+            scroll_filter=Filter(must=must),
+            limit=limit,
+            with_payload=True,
+            with_vectors=True,
         )
 
     def retrieve(

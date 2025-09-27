@@ -15,6 +15,12 @@ class VacancyBase(BaseModel):
     employer_id: int = 0
     title: str = ""
     description: str = ""
+    experience_age_from: int = 0
+    experience_age_to: int = 0
+    location: str = ""
+    salary_from: int = 0
+    salary_to: int = 0
+    employment_type: str = ""
 
 
 class EmployerBase(BaseModel):
@@ -40,15 +46,18 @@ class EmployerVacancyUpsert(VacancyBase):
     pass
 
 
+class VacancyCreate(BaseModel):
+    employer_id: int = 0
+    title: str = ""
+    description: str = ""
+    experience_age_from: int = 0
+    experience_age_to: int = 0
+    location: str = ""
+    salary_from: int = 0
+    salary_to: int = 0
+    employment_type: str = ""
+
+
 class EmployerVector(EmployerBase):
     vacancies: list[VacancyBase] = field(default_factory=list)
     skills: list[VacancySkill] = field(default_factory=list)
-
-
-class EmployerResponse(EmployerBase):
-    id: int
-    embedding_hard: list[float]
-    embedding_soft: list[float]
-
-    class Config:
-        from_attributes = True
