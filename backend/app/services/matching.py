@@ -1,7 +1,6 @@
 # Логика матчинга (LLM + Qdrant)
 from datetime import datetime
 from typing import TypeVar, Type
-from uuid import UUID
 
 from numpy import ndarray
 from qdrant_client.http.models import Filter, models
@@ -13,14 +12,14 @@ from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import QdrantAPI, AsyncSessionLocal, engine
 from backend.app.db.infrastructure.orm import MatchORM, Base
 from backend.app.models.match import (
-    CandidateMatchBase,
-    EmployerMatchBase,
     MatchCreate,
     MatchSearchFilter,
+    CandidateMatch,
+    EmployerMatch,
 )
 from backend.app.utils.embeddings import MembersEmbeddingSystem
 
-T = TypeVar("T", CandidateMatchBase, EmployerMatchBase)
+T = TypeVar("T", EmployerMatch, CandidateMatch)
 
 
 class MatchingError(Exception):
@@ -32,8 +31,8 @@ class MatchingError(Exception):
 class MatchingService:
     def __init__(self, qdrant_api: QdrantAPI):
         self.qdrant_api = qdrant_api
-        self.candidate_best_matches: list[CandidateMatchBase] = []
-        self.employer_best_matches: list[EmployerMatchBase] = []
+        self.candidate_best_matches: list[CandidateMatch] = []
+        self.employer_best_matches: list[EmployerMatch] = []
 
     async def find_best_candidates_for_employer(
         self,
@@ -43,12 +42,12 @@ class MatchingService:
         hard_filter: Filter | None = None,
         top_k=10,
         alpha=0.7,
-    ) -> list[CandidateMatchBase]:
+    ) -> list[CandidateMatch]:
         return await self._match_entities(
             source_collection=QdrantCollection.EMPLOYERS.value,
             target_collection=QdrantCollection.CANDIDATES.value,
             source_filter={"employer_id": employer_id, "vacancy_id": vacancy_id},
-            entity_cls=CandidateMatchBase,
+            entity_cls=CandidateMatch,
             soft_filter=soft_filter,
             hard_filter=hard_filter,
             top_k=top_k,
@@ -63,12 +62,12 @@ class MatchingService:
         hard_filter: Filter | None = None,
         top_k=10,
         alpha=0.8,
-    ) -> list[EmployerMatchBase]:
+    ) -> list[EmployerMatch]:
         return await self._match_entities(
             source_collection=QdrantCollection.CANDIDATES.value,
             target_collection=QdrantCollection.EMPLOYERS.value,
             source_filter={"user_id": user_id, "resume_id": resume_id},
-            entity_cls=EmployerMatchBase,
+            entity_cls=EmployerMatch,
             soft_filter=soft_filter,
             hard_filter=hard_filter,
             top_k=top_k,
@@ -121,8 +120,8 @@ class MatchingService:
             )
 
         # результаты поиска
-        scores: dict[UUID, float] = {}
-        matches: dict[UUID, T] = {}
+        scores: dict[str, float] = {}
+        matches: dict[str, T] = {}
 
         # ищем по hard skills
         for hard in hard_vectors:
@@ -239,8 +238,8 @@ class MatchingService:
     ) -> list[T]:
         """Поиск напрямую по embeddings пользователя (без source_collection)."""
 
-        scores: dict[UUID, float] = {}
-        matches: dict[UUID, T] = {}
+        scores: dict[str, float] = {}
+        matches: dict[str, T] = {}
 
         # Если не передали ничего, то возвращаем пустой список
         if (
@@ -343,12 +342,12 @@ class MatchingService:
 
         # проверим, что записи есть в БД
         match entity_cls:
-            case cls if cls is CandidateMatchBase:
+            case cls if cls is CandidateMatch:
                 vacancy_id = source_filter.get("vacancy_id", None)
                 target_collection = QdrantCollection.CANDIDATES.value
                 if not await uow.vacancies.get(vacancy_id):
                     raise MatchingError("Search resumes: Vacancy not found")
-            case cls if cls is EmployerMatchBase:
+            case cls if cls is EmployerMatch:
                 resume_id = source_filter.get("resume_id", None)
                 target_collection = QdrantCollection.EMPLOYERS.value
                 if not await uow.resumes.get(resume_id):
@@ -366,7 +365,9 @@ class MatchingService:
                 (
                     models.FieldCondition(
                         key=MembersDataType.SKILL_NAME.value,
-                        match=models.MatchAny(any=[s for s in hard_query.must_have]),
+                        match=models.MatchAny(
+                            any=[s.lower().strip() for s in hard_query.must_have]
+                        ),
                     )
                 )
             ]
@@ -376,7 +377,9 @@ class MatchingService:
                 (
                     models.FieldCondition(
                         key=MembersDataType.SUMMARY.value,
-                        match=models.MatchAny(any=[s for s in soft_query.must_have]),
+                        match=models.MatchAny(
+                            any=[s.lower().strip() for s in soft_query.must_have]
+                        ),
                     )
                 )
             ]
@@ -387,7 +390,7 @@ class MatchingService:
                     models.FieldCondition(
                         key=MembersDataType.SKILL_NAME.value,
                         match=models.MatchAny(
-                            any=[s for s in hard_query.must_not_have]
+                            any=[s.lower().strip() for s in hard_query.must_not_have]
                         ),
                     )
                 )
@@ -399,7 +402,7 @@ class MatchingService:
                     models.FieldCondition(
                         key=MembersDataType.SUMMARY.value,
                         match=models.MatchAny(
-                            any=[s for s in soft_query.must_not_have]
+                            any=[s.lower().strip() for s in soft_query.must_not_have]
                         ),
                     )
                 )
@@ -463,7 +466,7 @@ async def match():
                 db=db,
                 soft_query=MatchSearchFilter(),
                 hard_query=MatchSearchFilter(must_have=["Бард"]),
-                entity_cls=CandidateMatchBase,
+                entity_cls=CandidateMatch,
             )
             print(result)
             # await matcher.recalc_matches_for_vacancy(employer_id=0, vacancy_id=0, db=db)

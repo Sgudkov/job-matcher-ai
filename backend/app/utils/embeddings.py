@@ -9,6 +9,12 @@ from backend.app.config import MembersDataType
 import numpy as np
 
 from backend.app.models.candidate import CandidateVector
+from backend.app.models.embeddings import (
+    CandidatePayloadSoft,
+    CandidatePayloadHard,
+    EmployerPayloadSoft,
+    EmployerPayloadHard,
+)
 from backend.app.models.employer import EmployerVector
 
 
@@ -24,24 +30,30 @@ class MembersEmbeddingSystem:
             embedding_soft = MembersEmbeddingSystem.encode_long_text(
                 resume.summary, self.soft_model
             )
+
+            payload = CandidatePayloadSoft(
+                type=MembersDataType.SOFT_SKILL.value,
+                user_id=candidate.id,
+                resume_id=resume.id,
+                summary=resume.summary,
+                age=candidate.age,
+                location=resume.location,
+                salary_from=resume.salary_from,
+                salary_to=resume.salary_to,
+                employment_type=resume.employment_type,
+                experience_age=resume.experience_age,
+                summary_norm=resume.summary.lower().strip(),
+                location_norm=resume.location.lower().strip(),
+                employment_type_norm=resume.employment_type.lower().strip(),
+            )
+
             point_struct.append(
                 PointStruct(
                     id=str(uuid.uuid4()),
                     vector={
                         MembersDataType.SOFT_SKILL.value: embedding_soft.tolist(),
                     },
-                    payload={
-                        "type": MembersDataType.SOFT_SKILL.value.lower(),
-                        "user_id": candidate.id,
-                        "resume_id": resume.id,
-                        "summary": resume.summary.lower(),
-                        "age": candidate.age,
-                        "location": resume.location.lower(),
-                        "salary_from": resume.salary_from,
-                        "salary_to": resume.salary_to,
-                        "employment_type": resume.employment_type.lower(),
-                        "experience_age": resume.experience_age,
-                    },
+                    payload=payload.dict(),
                 )
             )
             skills = [x for x in candidate.skills if x.resume_id == resume.id]
@@ -50,19 +62,23 @@ class MembersEmbeddingSystem:
                     skill.skill_name, self.hard_model
                 )
 
+                payload = CandidatePayloadHard(
+                    type=MembersDataType.HARD_SKILL.value,
+                    user_id=candidate.id,
+                    resume_id=resume.id,
+                    skill_name=skill.skill_name,
+                    description=skill.description,
+                    skill_name_norm=skill.skill_name.lower().strip(),
+                    description_norm=skill.description.lower().strip(),
+                )
+
                 point_struct.append(
                     PointStruct(
                         id=str(uuid.uuid4()),
                         vector={
                             MembersDataType.HARD_SKILL.value: embedding_hard.tolist(),
                         },
-                        payload={
-                            "type": MembersDataType.HARD_SKILL.value.lower(),
-                            "user_id": candidate.id,
-                            "resume_id": resume.id,
-                            "skill_name": skill.skill_name.lower(),
-                            "description": skill.description.lower(),
-                        },
+                        payload=payload.dict(),
                     )
                 )
 
@@ -75,24 +91,30 @@ class MembersEmbeddingSystem:
             embedding_soft = MembersEmbeddingSystem.encode_long_text(
                 vacancy.description, self.soft_model
             )
+
+            payload = EmployerPayloadSoft(
+                type=MembersDataType.SOFT_SKILL.value,
+                employer_id=employer.id,
+                vacancy_id=vacancy.id,
+                description=vacancy.description,
+                experience_age_from=vacancy.experience_age_from,
+                experience_age_to=vacancy.experience_age_to,
+                location=vacancy.location,
+                salary_from=vacancy.salary_from,
+                salary_to=vacancy.salary_to,
+                employment_type=vacancy.employment_type,
+                description_norm=vacancy.description.lower().strip(),
+                location_norm=vacancy.location.lower().strip(),
+                employment_type_norm=vacancy.employment_type.lower().strip(),
+            )
+
             point_struct.append(
                 PointStruct(
                     id=str(uuid.uuid4()),
                     vector={
                         MembersDataType.SOFT_SKILL.value: embedding_soft.tolist(),
                     },
-                    payload={
-                        "type": MembersDataType.SOFT_SKILL.value.lower(),
-                        "employer_id": employer.id,
-                        "vacancy_id": vacancy.id,
-                        "description": vacancy.description.lower(),
-                        "experience_age_from": vacancy.experience_age_from,
-                        "experience_age_to": vacancy.experience_age_to,
-                        "location": vacancy.location.lower(),
-                        "salary_from": vacancy.salary_from,
-                        "salary_to": vacancy.salary_to,
-                        "employment_type": vacancy.employment_type.lower(),
-                    },
+                    payload=payload.dict(),
                 )
             )
             skills = [x for x in employer.skills if x.vacancy_id == vacancy.id]
@@ -101,19 +123,23 @@ class MembersEmbeddingSystem:
                     skill.skill_name, self.hard_model
                 )
 
+                payload = EmployerPayloadHard(
+                    type=MembersDataType.HARD_SKILL.value,
+                    employer_id=employer.id,
+                    vacancy_id=vacancy.id,
+                    skill_name=skill.skill_name,
+                    description=skill.description,
+                    skill_name_norm=skill.skill_name.lower().strip(),
+                    description_norm=skill.description.lower().strip(),
+                )
+
                 point_struct.append(
                     PointStruct(
                         id=str(uuid.uuid4()),
                         vector={
                             MembersDataType.HARD_SKILL.value: embedding_hard.tolist(),
                         },
-                        payload={
-                            "type": MembersDataType.HARD_SKILL.value.lower(),
-                            "employer_id": employer.id,
-                            "vacancy_id": vacancy.id,
-                            "skill_name": skill.skill_name.lower(),
-                            "description": skill.description.lower(),
-                        },
+                        payload=payload.dict(),
                     )
                 )
 

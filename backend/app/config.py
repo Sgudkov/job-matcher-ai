@@ -15,9 +15,9 @@ class MembersDataType(Enum):
     EMPLOYER = "employer"
     HARD_SKILL = "hard_skill"
     SOFT_SKILL = "soft_skill"
-    SKILL_NAME = "skill_name"
-    DESCRIPTION = "description"
-    SUMMARY = "summary"
+    SKILL_NAME = "skill_name_norm"
+    DESCRIPTION = "description_norm"
+    SUMMARY = "summary_norm"
 
 
 SOFT_MODEL = SentenceTransformer("ai-forever/ru-en-RoSBERTa")

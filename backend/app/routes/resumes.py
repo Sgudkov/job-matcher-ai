@@ -9,7 +9,7 @@ from backend.app.models.candidate import (
     CandidateResumeUpsert,
     ResumeSkill,
 )
-from backend.app.models.match import MatchSearchVacancies, CandidateMatchBase
+from backend.app.models.match import MatchSearchVacancies, CandidateMatch
 from backend.app.services.matching import MatchingService
 from backend.app.services.storage import upsert_resume
 
@@ -71,7 +71,7 @@ async def search_resumes(
             db=db,
             soft_query=search.soft_search,
             hard_query=search.hard_search,
-            entity_cls=CandidateMatchBase,
+            entity_cls=CandidateMatch,
         )
 
         return result
