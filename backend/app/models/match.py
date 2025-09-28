@@ -31,7 +31,7 @@ class MatchSearchFilter(BaseModel):
     must_not_have: list[str] = []
 
 
-class MatchSearchVacancies(BaseModel):
+class MatchSearch(BaseModel):
     vacancy_id: int
     hard_search: MatchSearchFilter = MatchSearchFilter()
     soft_search: MatchSearchFilter = MatchSearchFilter()

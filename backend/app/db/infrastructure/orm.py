@@ -26,6 +26,8 @@ class CandidateORM(Base):
     age = Column(Integer, nullable=True)
     email = Column(String(50), nullable=True)
     phone = Column(Numeric(20), nullable=True)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
     # Связь: у кандидата может быть несколько резюме
     resumes = relationship("ResumeORM", back_populates="candidate")
@@ -43,6 +45,9 @@ class ResumeORM(Base):
     salary_to = Column(Integer, nullable=True)
     employment_type = Column(String(50), nullable=True)
     candidate = relationship("CandidateORM", back_populates="resumes")
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
+    status = Column(String(20), default="active")
 
     # Связь: у резюме несколько hard skills
     skills = relationship("ResumeSkillORM", back_populates="resume")
@@ -63,8 +68,11 @@ class EmployerORM(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     first_name = Column(String(50), nullable=True)
     last_name = Column(String(50), nullable=True)
+    company_name = Column(String(100), nullable=True)
     email = Column(String(50), nullable=True)
     phone = Column(Numeric(20), nullable=True)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
     # Связь: у работодателя может быть несколько вакансий
     vacancies = relationship("VacancyORM", back_populates="employer")
@@ -82,6 +90,9 @@ class VacancyORM(Base):
     salary_from = Column(Integer, nullable=True)
     salary_to = Column(Integer, nullable=True)
     employment_type = Column(String(50), nullable=True)
+    work_mode = Column(String(20), nullable=True)
+    created_at = Column(DateTime, default=datetime.now())
+    updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
     employer = relationship("EmployerORM", back_populates="vacancies")
 
     # Связь: у вакансии несколько требуемых hard skills

@@ -47,3 +47,6 @@ ignore_missing_imports  = true
 
 [tool.poetry.requires-plugins]
 poetry-plugin-export = ">=1.8"
+
+[tool.poetry.group.dev.dependencies]
+alembic = "^1.16.5"

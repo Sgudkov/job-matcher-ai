@@ -16,7 +16,7 @@ from qdrant_client.http.models import (
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from torch import Tensor
 
-from backend.app.config import MembersDataType
+from backend.app.config import MembersDataType, QdrantCollection
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -116,7 +116,39 @@ class QdrantAPI:
             collection_name=collection_name, ids=member_uuid, with_vectors=True
         )
 
-    def remove_points(self, collection_name: str, **kwargs):
+    async def remove_employer_skills(self, employer_id: int, vacancy_id: int):
+        keys = {
+            "type": MembersDataType.SOFT_SKILL.value,
+            "employer_id": employer_id,
+            "vacancy_id": vacancy_id,
+        }
+
+        self._remove_points(
+            collection_name=QdrantCollection.EMPLOYERS.value, kwargs=keys
+        )
+
+        keys["type"] = MembersDataType.HARD_SKILL.value
+        self._remove_points(
+            collection_name=QdrantCollection.EMPLOYERS.value, kwargs=keys
+        )
+
+    async def remove_candidate_skills(self, candidate_id: int, resume_id: int):
+        keys = {
+            "type": MembersDataType.SOFT_SKILL.value,
+            "user_id": candidate_id,
+            "resume_id": resume_id,
+        }
+
+        self._remove_points(
+            collection_name=QdrantCollection.CANDIDATES.value, kwargs=keys
+        )
+
+        keys["type"] = MembersDataType.HARD_SKILL.value
+        self._remove_points(
+            collection_name=QdrantCollection.CANDIDATES.value, kwargs=keys
+        )
+
+    def _remove_points(self, collection_name: str, **kwargs):
         must = []
         args = kwargs.get("kwargs", {})
         for key, value in args.items():

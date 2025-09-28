@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.db.domain.unit_of_work import UnitOfWork
-from backend.app.db.infrastructure.database import get_db
+from backend.app.db.infrastructure.database import get_db, qdrant_api
 from backend.app.models.candidate import (
     CandidateCreate,
     CandidateUpdate,
@@ -52,10 +52,8 @@ async def update_candidate(
     try:
         uow = UnitOfWork(db)
         async with uow.transaction():
-            if not await uow.candidates.get(id_=candidate.id):
-                raise HTTPException(status_code=404, detail="Candidate not found")
-            result = await uow.candidates.update(candidate)
-        return result
+            new_candidate = await uow.candidates.update(id_=candidate.id, obj=candidate)
+        return new_candidate
     except Exception as e:
         logger.error(f"Error getting candidate: {e}")
         raise HTTPException(status_code=500, detail="Error getting candidate")
@@ -67,7 +65,11 @@ async def delete_candidate(candidate_id: int, db: AsyncSession = Depends(get_db)
     try:
         uow = UnitOfWork(db)
         async with uow.transaction():
+            resumes = await uow.resumes.get_by_candidate_id(candidate_id)
             await uow.candidates.remove(id_=candidate_id)
+            for resume in resumes:
+                await qdrant_api.remove_candidate_skills(candidate_id, resume.id)
+
     except Exception as e:
         logger.error(f"Error deleting candidate: {e}")
         raise HTTPException(status_code=500, detail="Error deleting candidate")

@@ -9,8 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app import config
 from backend.app.config import QdrantCollection, MembersDataType
 from backend.app.db.domain.unit_of_work import UnitOfWork
-from backend.app.db.infrastructure.database import QdrantAPI, AsyncSessionLocal, engine
-from backend.app.db.infrastructure.orm import MatchORM, Base
+from backend.app.db.infrastructure.database import QdrantAPI
+from backend.app.models.embeddings import CandidatePayloadBase, EmployerPayloadBase
 from backend.app.models.match import (
     MatchCreate,
     MatchSearchFilter,
@@ -20,6 +20,7 @@ from backend.app.models.match import (
 from backend.app.utils.embeddings import MembersEmbeddingSystem
 
 T = TypeVar("T", EmployerMatch, CandidateMatch)
+S = TypeVar("S", EmployerPayloadBase, CandidatePayloadBase)
 
 
 class MatchingError(Exception):
@@ -48,6 +49,7 @@ class MatchingService:
             target_collection=QdrantCollection.CANDIDATES.value,
             source_filter={"employer_id": employer_id, "vacancy_id": vacancy_id},
             entity_cls=CandidateMatch,
+            complex_cls=CandidatePayloadBase,
             soft_filter=soft_filter,
             hard_filter=hard_filter,
             top_k=top_k,
@@ -68,6 +70,7 @@ class MatchingService:
             target_collection=QdrantCollection.EMPLOYERS.value,
             source_filter={"user_id": user_id, "resume_id": resume_id},
             entity_cls=EmployerMatch,
+            complex_cls=EmployerPayloadBase,
             soft_filter=soft_filter,
             hard_filter=hard_filter,
             top_k=top_k,
@@ -92,6 +95,7 @@ class MatchingService:
         target_collection: str,
         source_filter: dict,
         entity_cls: Type[T],
+        complex_cls: Type[S],
         soft_filter: Filter | None = None,
         hard_filter: Filter | None = None,
         top_k=10,
@@ -135,11 +139,12 @@ class MatchingService:
                 with_payload=True,
             )
             for res in result.points:
-                if res.id not in matches:
-                    matches[res.id] = entity_cls(**res.payload, id=res.id)
-                scores[res.id] = scores.get(res.id, 0) + res.score * alpha / len(
-                    hard_vectors
-                )
+                complex_key = await complex_cls(**res.payload).get_complex_key()
+                if complex_key not in matches:
+                    matches[complex_key] = entity_cls(**res.payload, id=complex_key)
+                scores[complex_key] = scores.get(
+                    complex_key, 0
+                ) + res.score * alpha / len(hard_vectors)
 
         # ищем по soft skills
         for soft in soft_vectors:
@@ -154,11 +159,12 @@ class MatchingService:
                 with_payload=True,
             )
             for res in result.points:
-                if res.id not in matches:
-                    matches[res.id] = entity_cls(**res.payload, id=res.id)
-                scores[res.id] = scores.get(res.id, 0) + res.score * (1 - alpha) / len(
-                    soft_vectors
-                )
+                complex_key = await complex_cls(**res.payload).get_complex_key()
+                if complex_key not in matches:
+                    matches[complex_key] = entity_cls(**res.payload, id=complex_key)
+                scores[complex_key] = scores.get(complex_key, 0) + res.score * (
+                    1 - alpha
+                ) / len(soft_vectors)
 
         # проставляем итоговые score
         for m in matches.values():
@@ -188,7 +194,7 @@ class MatchingService:
                         match_.is_new = True
                 else:
                     await uow.matches.add(
-                        MatchORM(
+                        MatchCreate(
                             resume_id=resume_id,
                             vacancy_id=employer.vacancy_id,
                             score=employer.score,
@@ -330,30 +336,20 @@ class MatchingService:
 
     async def filter_search(
         self,
-        source_filter: dict,
-        db: AsyncSession,
         soft_query: MatchSearchFilter,
         hard_query: MatchSearchFilter,
         entity_cls: Type[T],
     ) -> list[T]:
         """Поиск соответствующих работодателей/кандидатов"""
 
-        uow = UnitOfWork(db)
-
-        # проверим, что записи есть в БД
+        # проверим какую коллекцию ищем
         match entity_cls:
             case cls if cls is CandidateMatch:
-                vacancy_id = source_filter.get("vacancy_id", None)
                 target_collection = QdrantCollection.CANDIDATES.value
-                if not await uow.vacancies.get(vacancy_id):
-                    raise MatchingError("Search resumes: Vacancy not found")
             case cls if cls is EmployerMatch:
-                resume_id = source_filter.get("resume_id", None)
                 target_collection = QdrantCollection.EMPLOYERS.value
-                if not await uow.resumes.get(resume_id):
-                    raise MatchingError("Search resumes: Resume not found")
             case _:
-                raise MatchingError("Search resumes: Entity not found")
+                raise MatchingError("filter_search: Entity not found")
 
         soft_filter = Filter(must=[], must_not=[], should=[])
         hard_filter = Filter(must=[], must_not=[], should=[])
@@ -377,10 +373,9 @@ class MatchingService:
                 (
                     models.FieldCondition(
                         key=MembersDataType.SUMMARY.value,
-                        match=models.MatchAny(
-                            any=[s.lower().strip() for s in soft_query.must_have]
-                        ),
+                        match=models.MatchText(text=word.lower()),
                     )
+                    for word in soft_query.must_have
                 )
             ]
 
@@ -402,7 +397,7 @@ class MatchingService:
                     models.FieldCondition(
                         key=MembersDataType.SUMMARY.value,
                         match=models.MatchAny(
-                            any=[s.lower().strip() for s in soft_query.must_not_have]
+                            any=[s.lower() for s in soft_query.must_not_have]
                         ),
                     )
                 )
@@ -452,29 +447,27 @@ class MatchingService:
         )
 
 
-async def match():
-    matcher = MatchingService(qdrant_api=QdrantAPI())
-
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    await engine.dispose()
-
-    try:
-        async with AsyncSessionLocal() as db:
-            result = await matcher.filter_search(
-                source_filter={"resume_id": 0},
-                db=db,
-                soft_query=MatchSearchFilter(),
-                hard_query=MatchSearchFilter(must_have=["Бард"]),
-                entity_cls=CandidateMatch,
-            )
-            print(result)
-            # await matcher.recalc_matches_for_vacancy(employer_id=0, vacancy_id=0, db=db)
-    except Exception as e:
-        print("Error matching: ", e)
-
-
-if __name__ == "__main__":
-    import asyncio
-
-    asyncio.run(match())
+# async def match():
+#     matcher = MatchingService(qdrant_api=QdrantAPI())
+#
+#     async with engine.begin() as conn:
+#         await conn.run_sync(Base.metadata.create_all)
+#     await engine.dispose()
+#
+#     try:
+#         async with AsyncSessionLocal() as db:
+#             result = await matcher.filter_search(
+#                 soft_query=MatchSearchFilter(),
+#                 hard_query=MatchSearchFilter(must_have=["Бард"]),
+#                 entity_cls=CandidateMatch,
+#             )
+#             print(result)
+#             # await matcher.recalc_matches_for_vacancy(employer_id=0, vacancy_id=0, db=db)
+#     except Exception as e:
+#         print("Error matching: ", e)
+#
+#
+# if __name__ == "__main__":
+#     import asyncio
+#
+#     asyncio.run(match())

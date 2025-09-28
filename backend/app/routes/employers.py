@@ -5,13 +5,12 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.db.domain.unit_of_work import UnitOfWork
-from backend.app.db.infrastructure.database import get_db
+from backend.app.db.infrastructure.database import get_db, qdrant_api
 from backend.app.models.employer import (
     EmployerCreate,
-    EmployerVacancyUpsert,
-    VacancySkill,
+    EmployerUpdate,
 )
-from backend.app.services.storage import register_employer, upsert_vacancy
+from backend.app.services.storage import register_employer
 
 router = APIRouter(prefix="/employers", tags=["employers"])
 
@@ -42,37 +41,27 @@ async def get_employer(employer_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Error getting employer")
 
 
-@router.get("/vector/{employer_id}")
-async def get_employer_vector(employer_id: int, db: AsyncSession = Depends(get_db)):
+@router.patch("/")
+async def update_employer(employer: EmployerUpdate, db: AsyncSession = Depends(get_db)):
     try:
         uow = UnitOfWork(db)
-        employer = await uow.employers.get(id_=employer_id)
-        return employer
+        async with uow.transaction():
+            new_employer = await uow.employers.update(id_=employer.id, obj=employer)
+        return new_employer
     except Exception as e:
         logger.error(f"Error getting employer: {e}")
         raise HTTPException(status_code=500, detail="Error getting employer")
 
 
-@router.post("/modify/vacancy/")
-async def modify_vacancy(
-    employer_vacancy: EmployerVacancyUpsert,
-    skills: list[VacancySkill],
-    db: AsyncSession = Depends(get_db),
-):
-    try:
-        new_vacancy = await upsert_vacancy(employer_vacancy, skills, db)
-        return new_vacancy
-    except Exception as e:
-        logger.error(f"Error getting employer: {e}")
-        raise HTTPException(status_code=500, detail="Error getting employer")
-
-
-@router.post("/delete/{employer_id}")
+@router.delete("/{employer_id}")
 async def delete_employer(employer_id: int, db: AsyncSession = Depends(get_db)):
     try:
         uow = UnitOfWork(db)
         async with uow.transaction():
+            vacancies = await uow.vacancies.get_by_employer_id(employer_id)
             await uow.employers.remove(id_=employer_id)
+            for vacancy in vacancies:
+                await qdrant_api.remove_employer_skills(employer_id, vacancy.id)
     except Exception as e:
         logger.error(f"Error deleting employer: {e}")
         raise HTTPException(status_code=500, detail="Error deleting employer")

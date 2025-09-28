@@ -8,7 +8,7 @@ from backend.app.utils.embeddings import members_embedding_system
 router = APIRouter(tags=["candidate_vectorization", "employer_vectorization"])
 
 
-@router.post("/candidate_vectorization/", response_model=CandidateEmbedding)
+@router.post("/candidate_vectorization/")
 async def vectorize_candidate(candidate: CandidateVector):
     embeddings = members_embedding_system.vectorize_candidate_data(candidate)
 
@@ -16,7 +16,7 @@ async def vectorize_candidate(candidate: CandidateVector):
     return candidate_embedding
 
 
-@router.post("/employer_vectorization/", response_model=EmployerEmbedding)
+@router.post("/employer_vectorization/")
 async def vectorize_employer(employer: EmployerVector):
     embeddings = members_embedding_system.vectorize_employer_data(employer)
 

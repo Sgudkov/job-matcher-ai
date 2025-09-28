@@ -6,6 +6,9 @@ class CandidatePayloadBase(BaseModel):
     user_id: int = 0
     resume_id: int = 0
 
+    async def get_complex_key(self):
+        return f"{self.user_id}_{self.resume_id}"
+
 
 class CandidatePayloadSoft(CandidatePayloadBase):
     summary: str = ""
@@ -18,6 +21,7 @@ class CandidatePayloadSoft(CandidatePayloadBase):
     summary_norm: str = ""
     location_norm: str = ""
     employment_type_norm: str = ""
+    status: str = "active"
 
 
 class CandidatePayloadHard(CandidatePayloadBase):
@@ -33,6 +37,9 @@ class EmployerPayloadBase(BaseModel):
     employer_id: int = 0
     vacancy_id: int = 0
 
+    async def get_complex_key(self):
+        return f"{self.employer_id}_{self.vacancy_id}"
+
 
 class EmployerPayloadSoft(EmployerPayloadBase):
     description: str = ""
@@ -45,6 +52,7 @@ class EmployerPayloadSoft(EmployerPayloadBase):
     description_norm: str = ""
     location_norm: str = ""
     employment_type_norm: str = ""
+    work_mode: str = ""
 
 
 class EmployerPayloadHard(EmployerPayloadBase):

@@ -4,56 +4,68 @@ import logging
 from fastapi import Depends, HTTPException, APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.db.infrastructure.database import get_db
+from backend.app.db.domain.unit_of_work import UnitOfWork
+from backend.app.db.infrastructure.database import get_db, QdrantAPI
+from backend.app.services.matching import MatchingService
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-router_employers = APIRouter(prefix="/employers", tags=["employers"])
+router = APIRouter(prefix="/matches", tags=["matches"])
+recalc_router = APIRouter(prefix="/recalc", tags=["recalc"])
 
 
-@router_employers.get("/{employer_id}/recommendations")
-async def get_employer_recommendations(
-    employer_id: str, db: AsyncSession = Depends(get_db)
-):
+@router.get("/resumes/{resume_id}")
+async def get_resume_matches(resume_id: int, db: AsyncSession = Depends(get_db)):
     try:
-        return "OK"
-        # response: [MatchCandidateResult] = []
-        # candidate_members = SqlCandidate(db)
-        # match_service = MatchingService(qdrant_api=qdrant_api)
-        # best_employers = match_service.find_best_candidates_for_employer(
-        #     employer_id=employer_id
-        # )
-
-        # for employer in best_employers:
-        #     response.append(await candidate_members.get_by_candidate_id(candidate_id=employer[0]))
-
-        # return response
+        uow = UnitOfWork(db)
+        async with uow.transaction():
+            result = await uow.matches.get_vacancies_by_resume_id(resume_id=resume_id)
+        return result
     except Exception as e:
-        logger.error(f"Error getting employer: {e}")
-        raise HTTPException(status_code=500, detail="Error getting employer")
+        logger.error(f"Error getting candidate: {e}")
+        raise HTTPException(status_code=500, detail="Error getting candidate")
 
 
-router_candidates = APIRouter(prefix="/candidates", tags=["candidates"])
-
-
-@router_candidates.get("/{candidate_id}/recommendations")
-async def get_candidate_recommendations(
-    candidate_id: str, db: AsyncSession = Depends(get_db)
-):
+@router.get("/vacancies/{vacancy_id}")
+async def get_vacancy_matches(vacancy_id: int, db: AsyncSession = Depends(get_db)):
     try:
-        return "OK"
-        # response: [MatchEmployerResult] = []
-        # employer_members = SqlEmployer(db)
-        # match_service = MatchingService(qdrant_api=qdrant_api)
-        # best_employers = match_service.find_best_employers_for_candidate(
-        #     user_id=candidate_id
-        # )
-        #
-        # # for employer in best_employers:
-        # #     response.append(await employer_members.get_by_employer_id(employer_id=employer[0]))
-        #
-        # return response
+        uow = UnitOfWork(db)
+        async with uow.transaction():
+            result = await uow.matches.get_resumes_by_vacancy_id(vacancy_id=vacancy_id)
+        return result
+    except Exception as e:
+        logger.error(f"Error getting candidate: {e}")
+        raise HTTPException(status_code=500, detail="Error getting candidate")
+
+
+@recalc_router.post("/matches/vacancy/")
+async def recalc_resumes(
+    employer_id: int, vacancy_id: int, db: AsyncSession = Depends(get_db)
+):
+    """Пересчитать матчи для соискателя"""
+    try:
+        matcher = MatchingService(qdrant_api=QdrantAPI())
+        await matcher.recalc_matches_for_vacancy(
+            employer_id=employer_id, vacancy_id=vacancy_id, db=db
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting candidate: {e}")
+        raise HTTPException(status_code=500, detail="Error getting candidate")
+
+
+@recalc_router.post("/matches/resume/")
+async def recalc_vacancies(
+    resume_id: int, user_id: int, db: AsyncSession = Depends(get_db)
+):
+    """Пересчитать матчи для вакансии"""
+    try:
+        matcher = MatchingService(qdrant_api=QdrantAPI())
+        await matcher.recalc_matches_for_resume(
+            resume_id=resume_id, user_id=user_id, db=db
+        )
+
     except Exception as e:
         logger.error(f"Error getting candidate: {e}")
         raise HTTPException(status_code=500, detail="Error getting candidate")

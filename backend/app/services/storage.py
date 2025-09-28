@@ -3,18 +3,19 @@ import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.config import QdrantCollection, MembersDataType
+from backend.app.config import QdrantCollection
 from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import qdrant_api
 from backend.app.db.infrastructure.orm import CandidateORM, EmployerORM
 from backend.app.models.candidate import (
     CandidateCreate,
     CandidateEmbedding,
-    CandidateResumeUpsert,
+    ResumeUpsert,
     ResumeBase,
-    ResumeSkill,
+    ResumeSkillBase,
     CandidateVector,
     ResumeCreate,
+    CandidateBase,
 )
 from backend.app.models.employer import (
     EmployerCreate,
@@ -24,6 +25,7 @@ from backend.app.models.employer import (
     VacancySkill,
     EmployerVector,
     VacancyCreate,
+    EmployerBase,
 )
 from backend.app.services.embeddings import vectorize_candidate, vectorize_employer
 
@@ -53,11 +55,13 @@ async def register_candidate(
 
 
 async def upsert_resume(
-    new_resume: CandidateResumeUpsert, skills: list[ResumeSkill], db: AsyncSession
+    new_resume: ResumeUpsert, skills: list[ResumeSkillBase], db: AsyncSession
 ):
     uow = UnitOfWork(db)
     async with uow.transaction():
-        candidate = await uow.candidates.get(id_=new_resume.candidate_id)
+        candidate = CandidateBase.from_orm(
+            await uow.candidates.get(id_=new_resume.candidate_id)
+        )
         if not candidate:
             raise Exception("Upsert resume: Candidate not found")
 
@@ -75,18 +79,13 @@ async def upsert_resume(
             resume = None
 
         if resume:
-            resume.title = new_resume.title
-            resume.summary = new_resume.summary
-            resume.experience_age = new_resume.experience_age
-            resume.location = new_resume.location
-            resume.salary_from = new_resume.salary_from
-            resume.salary_to = new_resume.salary_to
-            resume.employment_type = new_resume.employment_type
+            for key, value in new_resume.model_dump(exclude={"id"}).items():
+                setattr(resume, key, value)
         else:
-            create_resume = new_resume.model_dump(exclude={"id"})
-            create_resume = ResumeCreate(**create_resume)
-            resume = await uow.resumes.add(create_resume)
+            resume_create = ResumeCreate(**new_resume.dict(exclude={"id"}))
+            resume = await uow.resumes.add(resume_create)
             await uow.session.flush()
+            resume = ResumeCreate.from_orm(resume)
             for skill in skills:
                 skill.resume_id = resume.id
 
@@ -97,20 +96,7 @@ async def upsert_resume(
         if skills:
             await uow.resume_skills.remove_skills_by_resume_id(resume.id)
 
-            keys = {
-                "type": MembersDataType.SOFT_SKILL.value,
-                "user_id": candidate.id,
-                "resume_id": resume.id,
-            }
-
-            qdrant_api.remove_points(
-                collection_name=QdrantCollection.CANDIDATES.value, kwargs=keys
-            )
-
-            keys["type"] = MembersDataType.HARD_SKILL.value
-            qdrant_api.remove_points(
-                collection_name=QdrantCollection.CANDIDATES.value, kwargs=keys
-            )
+            await qdrant_api.remove_candidate_skills(candidate.id, resume.id)
 
             # Добавление скиллов
             for skill in skills:
@@ -120,13 +106,8 @@ async def upsert_resume(
         # векторизация
         embedding: CandidateEmbedding = await vectorize_candidate(
             CandidateVector(
-                id=candidate.id,
-                first_name=candidate.first_name,
-                last_name=candidate.last_name,
-                email=candidate.email,
-                phone=candidate.phone,
-                age=candidate.age,
-                resumes=[ResumeBase(**resume.__dict__)],
+                **candidate.model_dump(exclude={"resumes", "skills"}),
+                resumes=[ResumeBase(**resume.model_dump())],
                 skills=skills,
             )
         )
@@ -135,7 +116,7 @@ async def upsert_resume(
             collection_name=QdrantCollection.CANDIDATES.value,
             vectors=embedding.embeddings,
         )
-    return candidate
+    return resume
 
 
 async def register_employer(employer: EmployerCreate, db: AsyncSession) -> EmployerORM:
@@ -150,7 +131,9 @@ async def upsert_vacancy(
 ):
     uow = UnitOfWork(db)
     async with uow.transaction():
-        employer = await uow.employers.get(id_=new_vacancy.employer_id)
+        employer = EmployerBase.from_orm(
+            await uow.employers.get(id_=new_vacancy.employer_id)
+        )
         if not employer:
             raise Exception("Upsert vacancy: Vacancy not found")
 
@@ -165,18 +148,13 @@ async def upsert_vacancy(
             vacancy = None
 
         if vacancy:
-            vacancy.title = new_vacancy.title
-            vacancy.description = new_vacancy.description
-            vacancy.experience_age_from = new_vacancy.experience_age_from
-            vacancy.experience_age_to = new_vacancy.experience_age_to
-            vacancy.location = new_vacancy.location
-            vacancy.salary_from = new_vacancy.salary_from
-            vacancy.salary_to = new_vacancy.salary_to
-            vacancy.employment_type = new_vacancy.employment_type
+            for key, value in new_vacancy.model_dump(exclude={"id"}).items():
+                setattr(vacancy, key, value)
         else:
             create_vacancy = VacancyCreate(**new_vacancy.dict(exclude={"id"}))
             vacancy = await uow.vacancies.add(create_vacancy)
             await uow.session.flush()
+            vacancy = VacancyCreate.from_orm(vacancy)
             for skill in skills:
                 skill.vacancy_id = vacancy.id
 
@@ -187,20 +165,7 @@ async def upsert_vacancy(
         if skills:
             await uow.vacancy_skills.remove_skills_by_vacancy_id(vacancy.id)
 
-            keys = {
-                "type": MembersDataType.SOFT_SKILL.value,
-                "employer_id": employer.id,
-                "vacancy_id": vacancy.id,
-            }
-
-            qdrant_api.remove_points(
-                collection_name=QdrantCollection.EMPLOYERS.value, kwargs=keys
-            )
-
-            keys["type"] = MembersDataType.HARD_SKILL.value
-            qdrant_api.remove_points(
-                collection_name=QdrantCollection.EMPLOYERS.value, kwargs=keys
-            )
+            await qdrant_api.remove_employer_skills(employer.id, vacancy.id)
 
             # Добавление скиллов
             for skill in skills:
@@ -210,12 +175,8 @@ async def upsert_vacancy(
         # векторизация
         embedding: EmployerEmbedding = await vectorize_employer(
             EmployerVector(
-                id=employer.id,
-                first_name=employer.first_name,
-                last_name=employer.last_name,
-                email=employer.email,
-                phone=employer.phone,
-                vacancies=[VacancyBase(**vacancy.__dict__)],
+                **employer.model_dump(exclude={"vacancies", "skills"}),
+                vacancies=[VacancyBase(**vacancy.model_dump())],
                 skills=skills,
             )
         )
@@ -224,4 +185,4 @@ async def upsert_vacancy(
             collection_name=QdrantCollection.EMPLOYERS.value,
             vectors=embedding.embeddings,
         )
-    return employer
+    return vacancy

@@ -68,3 +68,13 @@ class MatchRepository(BaseRepository[MatchORM]):
 
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
+
+    async def get_resumes_by_vacancy_id(self, vacancy_id: int):
+        stmt = select(MatchORM).where(MatchORM.vacancy_id == vacancy_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
+    async def get_vacancies_by_resume_id(self, resume_id: int):
+        stmt = select(MatchORM).where(MatchORM.resume_id == resume_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().all()

@@ -1,4 +1,5 @@
 from dataclasses import field
+from datetime import datetime
 
 from pydantic import BaseModel
 from qdrant_client.http.models import PointStruct
@@ -10,8 +11,7 @@ class VacancySkill(BaseModel):
     description: str = ""
 
 
-class VacancyBase(BaseModel):
-    id: int = 0
+class VacancyData(BaseModel):
     employer_id: int = 0
     title: str = ""
     description: str = ""
@@ -21,6 +21,11 @@ class VacancyBase(BaseModel):
     salary_from: int = 0
     salary_to: int = 0
     employment_type: str = ""
+    work_mode: str = ""
+
+
+class VacancyBase(VacancyData):
+    id: int = 0
 
 
 class EmployerBase(BaseModel):
@@ -30,6 +35,9 @@ class EmployerBase(BaseModel):
     email: str
     phone: int
 
+    class Config:
+        from_attributes = True
+
 
 class EmployerEmbedding(BaseModel):
     embeddings: list[PointStruct] = field(default_factory=list)
@@ -38,24 +46,26 @@ class EmployerEmbedding(BaseModel):
 class EmployerCreate(BaseModel):
     first_name: str
     last_name: str
+    company_name: str
     email: str
     phone: int
+
+
+class EmployerUpdate(EmployerCreate):
+    id: int
 
 
 class EmployerVacancyUpsert(VacancyBase):
     pass
 
 
-class VacancyCreate(BaseModel):
-    employer_id: int = 0
-    title: str = ""
-    description: str = ""
-    experience_age_from: int = 0
-    experience_age_to: int = 0
-    location: str = ""
-    salary_from: int = 0
-    salary_to: int = 0
-    employment_type: str = ""
+class VacancyCreate(VacancyData):
+    id: int | None = None
+    created_at: datetime | None = field(default_factory=datetime.now)
+    updated_at: datetime | None = field(default_factory=datetime.now)
+
+    class Config:
+        from_attributes = True
 
 
 class EmployerVector(EmployerBase):
