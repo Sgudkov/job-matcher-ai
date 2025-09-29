@@ -97,7 +97,7 @@ class MembersEmbeddingSystem:
                 type=MembersDataType.SOFT_SKILL.value,
                 employer_id=employer.id,
                 vacancy_id=vacancy.id,
-                description=vacancy.description,
+                summary=vacancy.summary,
                 experience_age_from=vacancy.experience_age_from,
                 experience_age_to=vacancy.experience_age_to,
                 location=vacancy.location,

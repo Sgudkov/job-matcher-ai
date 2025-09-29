@@ -6,8 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import get_db, QdrantAPI, qdrant_api
 from backend.app.models.employer import EmployerVacancyUpsert, VacancySkill
-from backend.app.models.match import MatchSearch, EmployerMatch
-from backend.app.services.matching import MatchingService
+from backend.app.models.filter import SearchRequest
+from backend.app.models.match import EmployerMatch
+from backend.app.services.fiter import SearchFilter
 from backend.app.services.storage import upsert_vacancy
 
 router = APIRouter(prefix="/vacancies", tags=["vacancies"])
@@ -58,14 +59,12 @@ async def delete_vacancy(id_: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/search")
-async def search_vacancies(search: MatchSearch):
+async def search_vacancies(search: SearchRequest):
     """Поиск соискателей по вакансии"""
     try:
-        matcher = MatchingService(qdrant_api=QdrantAPI())
+        matcher = SearchFilter(qdrant_api=QdrantAPI(), entity_cls=EmployerMatch)
         result = await matcher.filter_search(
-            soft_query=search.soft_search,
-            hard_query=search.hard_search,
-            entity_cls=EmployerMatch,
+            search_request=search,
         )
 
         return result

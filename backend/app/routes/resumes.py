@@ -6,9 +6,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import get_db, QdrantAPI, qdrant_api
 from backend.app.models.candidate import ResumeUpsert, ResumeSkillBase
+from backend.app.models.filter import SearchRequest
 
-from backend.app.models.match import MatchSearch, CandidateMatch
-from backend.app.services.matching import MatchingService
+from backend.app.models.match import CandidateMatch
+from backend.app.services.fiter import SearchFilter
 from backend.app.services.storage import upsert_resume
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
@@ -62,14 +63,12 @@ async def delete_resume(id_: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.post("/search")
-async def search_resumes(search: MatchSearch):
+async def search_resumes(search: SearchRequest):
     """Поиск соискателей по вакансии"""
     try:
-        matcher = MatchingService(qdrant_api=QdrantAPI())
+        matcher = SearchFilter(qdrant_api=QdrantAPI(), entity_cls=CandidateMatch)
         result = await matcher.filter_search(
-            soft_query=search.soft_search,
-            hard_query=search.hard_search,
-            entity_cls=CandidateMatch,
+            search_request=search,
         )
 
         return result

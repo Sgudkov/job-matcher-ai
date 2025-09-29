@@ -14,7 +14,7 @@ class VacancySkill(BaseModel):
 class VacancyData(BaseModel):
     employer_id: int = 0
     title: str = ""
-    description: str = ""
+    summary: str = ""
     experience_age_from: int = 0
     experience_age_to: int = 0
     location: str = ""

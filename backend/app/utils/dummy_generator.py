@@ -10,7 +10,7 @@ from backend.app.services.storage import register_candidate, register_employer
 async def generate_candidates():
     db_gen = get_db()
 
-    with open("dummy_candidate_data.json", "r", encoding="utf-8") as f:
+    with open("../../../dummy_candidate_data.json", "r", encoding="utf-8") as f:
         candidates = json.load(f)
     async for session in db_gen:
         sql_candidate = SqlCandidate(session)

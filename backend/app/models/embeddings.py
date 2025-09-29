@@ -42,7 +42,7 @@ class EmployerPayloadBase(BaseModel):
 
 
 class EmployerPayloadSoft(EmployerPayloadBase):
-    description: str = ""
+    summary: str = ""
     experience_age_from: int = 0
     experience_age_to: int = 0
     location: str = ""

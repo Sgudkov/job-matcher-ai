@@ -83,7 +83,7 @@ class VacancyORM(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     employer_id = Column(Integer, ForeignKey("employers.id", ondelete="CASCADE"))
     title = Column(String(100), nullable=False)  # например "Middle Python Developer"
-    description = Column(Text, nullable=True)  # soft skills / культура / команда
+    summary = Column(Text, nullable=True)  # soft skills / культура / команда
     experience_age_from = Column(Integer, nullable=True)
     experience_age_to = Column(Integer, nullable=True)
     location = Column(String(50), nullable=True)

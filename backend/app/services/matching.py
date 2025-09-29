@@ -2,22 +2,18 @@
 from datetime import datetime
 from typing import TypeVar, Type
 
-from numpy import ndarray
-from qdrant_client.http.models import Filter, models
+from qdrant_client.http.models import Filter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app import config
 from backend.app.config import QdrantCollection, MembersDataType
 from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import QdrantAPI
 from backend.app.models.embeddings import CandidatePayloadBase, EmployerPayloadBase
 from backend.app.models.match import (
     MatchCreate,
-    MatchSearchFilter,
     CandidateMatch,
     EmployerMatch,
 )
-from backend.app.utils.embeddings import MembersEmbeddingSystem
 
 T = TypeVar("T", EmployerMatch, CandidateMatch)
 S = TypeVar("S", EmployerPayloadBase, CandidatePayloadBase)
@@ -230,221 +226,6 @@ class MatchingService:
                         is_new=True,
                     )
                     await uow.matches.add(new_match)
-
-    async def _filter_search_entities(
-        self,
-        target_collection: str,
-        entity_cls: Type[T],
-        soft_vector: ndarray | None = None,
-        hard_vector: ndarray | None = None,
-        soft_filter: Filter | None = None,
-        hard_filter: Filter | None = None,
-        top_k: int = 20,
-        alpha: float = 0.8,
-    ) -> list[T]:
-        """Поиск напрямую по embeddings пользователя (без source_collection)."""
-
-        scores: dict[str, float] = {}
-        matches: dict[str, T] = {}
-
-        # Если не передали ничего, то возвращаем пустой список
-        if (
-            hard_vector is None
-            and soft_vector is None
-            and not hard_filter
-            and not soft_filter
-        ):
-            return []
-
-        if (hard_filter or soft_filter) and hard_vector is None and soft_vector is None:
-            # Есть только фильтры
-
-            must = []
-            must_not = []
-            if soft_filter:
-                if soft_filter.must:
-                    must += soft_filter.must
-                if soft_filter.must_not:
-                    must_not += soft_filter.must_not
-
-            if hard_filter:
-                if hard_filter.must:
-                    must += hard_filter.must
-                if hard_filter.must_not:
-                    must_not += hard_filter.must_not
-
-            # Если передать пустые, то поиск работать не будет
-            if not must:
-                must = None  # type: ignore[assignment]
-
-            if not must_not:
-                must_not = None  # type: ignore[assignment]
-
-            result, _ = self.qdrant_api.client.scroll(
-                collection_name=target_collection,
-                scroll_filter=Filter(
-                    must=must,
-                    must_not=must_not,
-                ),
-                limit=100,
-                with_vectors=False,
-                with_payload=True,
-            )
-            for res in result:
-                if res.id not in matches:
-                    matches[res.id] = entity_cls(**res.payload, id=res.id)
-            return list(matches.values())
-        else:
-            # Есть вектора (и, возможно фильтры)
-            if hard_vector is not None:
-                # Ищем кандидатов по hard_skill
-                result = self.qdrant_api.client.query_points(
-                    collection_name=target_collection,
-                    query=hard_vector,
-                    using=MembersDataType.HARD_SKILL.value,
-                    query_filter=hard_filter,
-                    limit=100,
-                    with_vectors=False,
-                    with_payload=True,
-                )
-                for res in result.points:
-                    if res.id not in matches:
-                        matches[res.id] = entity_cls(**res.payload, id=res.id)
-                    scores[res.id] = scores.get(res.id, 0) + res.score * alpha
-
-            if soft_vector is not None:
-                # Ищем работодателей по soft_skill
-                result = self.qdrant_api.client.query_points(
-                    collection_name=target_collection,
-                    query=soft_vector,
-                    using=MembersDataType.SOFT_SKILL.value,
-                    query_filter=soft_filter,
-                    limit=100,
-                    with_vectors=False,
-                    with_payload=True,
-                )
-                for res in result.points:
-                    if res.id not in matches:
-                        matches[res.id] = entity_cls(**res.payload, id=res.id)
-                    scores[res.id] = scores.get(res.id, 0) + res.score * (1 - alpha)
-
-        # проставляем итоговые score
-        for m in matches.values():
-            m.score = scores.get(m.id, 0)
-
-        return sorted(matches.values(), key=lambda x: x.score, reverse=True)[:top_k]
-
-    async def filter_search(
-        self,
-        soft_query: MatchSearchFilter,
-        hard_query: MatchSearchFilter,
-        entity_cls: Type[T],
-    ) -> list[T]:
-        """Поиск соответствующих работодателей/кандидатов"""
-
-        # проверим какую коллекцию ищем
-        match entity_cls:
-            case cls if cls is CandidateMatch:
-                target_collection = QdrantCollection.CANDIDATES.value
-            case cls if cls is EmployerMatch:
-                target_collection = QdrantCollection.EMPLOYERS.value
-            case _:
-                raise MatchingError("filter_search: Entity not found")
-
-        soft_filter = Filter(must=[], must_not=[], should=[])
-        hard_filter = Filter(must=[], must_not=[], should=[])
-
-        # Соберем фильтры
-
-        if hard_query.must_have:
-            hard_filter.must = [
-                (
-                    models.FieldCondition(
-                        key=MembersDataType.SKILL_NAME.value,
-                        match=models.MatchAny(
-                            any=[s.lower().strip() for s in hard_query.must_have]
-                        ),
-                    )
-                )
-            ]
-
-        if soft_query.must_have:
-            soft_filter.must = [
-                (
-                    models.FieldCondition(
-                        key=MembersDataType.SUMMARY.value,
-                        match=models.MatchText(text=word.lower()),
-                    )
-                    for word in soft_query.must_have
-                )
-            ]
-
-        if hard_query.must_not_have:
-            hard_filter.must_not = [
-                (
-                    models.FieldCondition(
-                        key=MembersDataType.SKILL_NAME.value,
-                        match=models.MatchAny(
-                            any=[s.lower().strip() for s in hard_query.must_not_have]
-                        ),
-                    )
-                )
-            ]
-
-        if soft_query.must_not_have:
-            soft_filter.must_not = [
-                (
-                    models.FieldCondition(
-                        key=MembersDataType.SUMMARY.value,
-                        match=models.MatchAny(
-                            any=[s.lower() for s in soft_query.must_not_have]
-                        ),
-                    )
-                )
-            ]
-
-        text_hard = " ".join(
-            [
-                " ".join([s.lower() for s in hard_query.must_have] or []),
-                " ".join([s.lower() for s in hard_query.should_have] or []),
-            ]
-        ).strip()
-
-        text_soft = " ".join(
-            [
-                " ".join([s.lower() for s in soft_query.must_have] or []),
-                " ".join([s.lower() for s in soft_query.should_have] or []),
-            ]
-        ).strip()
-
-        if text_soft:
-            soft_vector = MembersEmbeddingSystem.encode_long_text(
-                model=config.SOFT_MODEL, text=text_soft
-            )
-        else:
-            soft_vector = None
-
-        if text_hard:
-            hard_vector = MembersEmbeddingSystem.encode_long_text(
-                model=config.HARD_MODEL, text=text_hard
-            )
-        else:
-            hard_vector = None
-
-        if not hard_filter.must and not hard_filter.must_not:
-            hard_filter = None
-
-        if not soft_filter.must and not soft_filter.must_not:
-            soft_filter = None
-
-        return await self._filter_search_entities(
-            target_collection=target_collection,
-            entity_cls=entity_cls,
-            soft_vector=soft_vector,
-            hard_vector=hard_vector,
-            soft_filter=soft_filter,
-            hard_filter=hard_filter,
-        )
 
 
 # async def match():
