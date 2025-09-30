@@ -6,7 +6,7 @@ from qdrant_client.http.models import Filter, models
 from backend.app import config
 from backend.app.config import MembersDataType, QdrantCollection
 from backend.app.db.infrastructure.database import QdrantAPI
-from backend.app.models.filter import SearchRequest
+from backend.app.models.filter import SearchRequest, SearchFilters
 from backend.app.models.match import EmployerMatch, CandidateMatch
 from backend.app.utils.embeddings import MembersEmbeddingSystem
 
@@ -27,10 +27,12 @@ class SearchFilter:
     async def _filter_search_entities(
         self,
         target_collection: str,
+        hard_vector_not: ndarray | None = None,
         soft_vector: ndarray | None = None,
         hard_vector: ndarray | None = None,
         soft_filter: Filter | None = None,
         hard_filter: Filter | None = None,
+        similarity_threshold: float = 0.8,
         top_k: int = 20,
         alpha: float = 0.8,
     ) -> list[T]:
@@ -39,6 +41,7 @@ class SearchFilter:
         scores: dict[str, float] = {}
         matches: dict[str, T] = {}
         search_counter = {}
+        matches_to_exclude = set()
 
         # Если не передали ничего, то возвращаем пустой список
         if (
@@ -84,8 +87,11 @@ class SearchFilter:
                 with_payload=True,
             )
             for res in result:
-                if res.id not in matches:
-                    matches[res.id] = self.entity_cls(**res.payload, id=res.id)  # type: ignore[call-arg]
+                complex_key = await self.entity_cls(**res.payload).get_complex_key()
+                if complex_key not in matches:
+                    matches[complex_key] = self.entity_cls(
+                        **res.payload, id=complex_key
+                    )  # type: ignore[call-arg]
             return list(matches.values())
         else:
             # Есть вектора (и, возможно фильтры)
@@ -101,32 +107,56 @@ class SearchFilter:
                     with_payload=True,
                 )
                 for res in result.points:
-                    if res.id not in matches:
-                        matches[res.id] = self.entity_cls(**res.payload, id=res.id)  # type: ignore[call-arg]
-                        search_counter[res.id] = 0
-                    scores[res.id] = scores.get(res.id, 0) + res.score * alpha
-                    search_counter[res.id] += 1
+                    complex_key = await self.entity_cls(**res.payload).get_complex_key()
 
-            if soft_vector is not None:
-                # Ищем работодателей по soft_skill
-                result = self.qdrant_api.client.query_points(
-                    collection_name=target_collection,
-                    query=soft_vector,
-                    using=MembersDataType.SOFT_SKILL.value,
-                    query_filter=soft_filter,
-                    limit=100,
-                    with_vectors=False,
-                    with_payload=True,
-                )
-                for res in result.points:
-                    if res.id not in matches:
-                        matches[res.id] = self.entity_cls(**res.payload, id=res.id)  # type: ignore[call-arg]
-                        search_counter[res.id] = 0
-                    scores[res.id] = scores.get(res.id, 0) + res.score * (1 - alpha)
-                    search_counter[res.id] += 1
+                    # Если сходство ниже порога, то будем такой ключ исключать
+                    if hard_vector_not is not None:
+                        exclude = await self._is_must_excluded(
+                            target_collection=target_collection,
+                            keys=await self.entity_cls(
+                                **res.payload
+                            ).get_key_name_value(),
+                            vector_name=MembersDataType.HARD_SKILL.value,
+                            must_not_vectors=hard_vector_not,
+                            similarity_threshold=similarity_threshold,
+                        )
 
-        # проставляем итоговые score
+                        if exclude:
+                            matches_to_exclude.add(complex_key)
+
+                    if complex_key not in matches:
+                        matches[complex_key] = self.entity_cls(
+                            **res.payload, id=complex_key
+                        )  # type: ignore[call-arg]
+                        search_counter[complex_key] = 0
+                    scores[complex_key] = scores.get(complex_key, 0) + res.score * alpha
+                    search_counter[complex_key] += 1
+
+        if soft_vector is not None:
+            # Ищем работодателей по soft_skill
+            result = self.qdrant_api.client.query_points(
+                collection_name=target_collection,
+                query=soft_vector,
+                using=MembersDataType.SOFT_SKILL.value,
+                query_filter=soft_filter,
+                limit=100,
+                with_vectors=False,
+                with_payload=True,
+            )
+            for res in result.points:
+                complex_key = await self.entity_cls(**res.payload).get_complex_key()
+                if complex_key not in matches:
+                    matches[complex_key] = self.entity_cls(
+                        **res.payload, id=complex_key
+                    )  # type: ignore[call-arg]
+                    search_counter[complex_key] = 0
+                scores[complex_key] = scores.get(res.id, 0) + res.score * (1 - alpha)
+                search_counter[complex_key] += 1
+
+        # проставляем итоговые score и проверяем вхождение на исключения
         for m in matches.values():
+            if m.id in matches_to_exclude:
+                continue
             m.score = scores.get(m.id, 0)
             # Усредним оценку, чтобы не было перекосов, если у кого одних векторов больше чем других
             if search_counter[m.id] > 0:
@@ -134,17 +164,68 @@ class SearchFilter:
 
         return sorted(matches.values(), key=lambda x: x.score, reverse=True)[:top_k]
 
+    async def _is_must_excluded(
+        self,
+        target_collection: str,
+        keys: tuple,
+        vector_name: str,
+        similarity_threshold: float,
+        must_not_vectors: list[list[float]],
+    ) -> bool:
+        """Проверяем вхождение в must_not"""
+        points = self.qdrant_api.client.query_points(
+            collection_name=target_collection,
+            using=vector_name,
+            query_filter=Filter(
+                must=[
+                    models.FieldCondition(
+                        key=keys[0], match=models.MatchValue(value=keys[1])
+                    )
+                ]
+            ),
+            limit=50,
+            with_vectors=True,  # важно получить векторы!
+        )
+
+        for point in points.points:
+            point_vector = point.vector.get(vector_name, [])
+            if not point_vector:
+                continue
+            for vector in must_not_vectors:
+                if self._cosine_similarity(point_vector, vector) > similarity_threshold:
+                    return True
+
+        return False
+
+    def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
+        """Вычисляет косинусную схожесть между векторами."""
+        import numpy as np
+
+        v1 = np.array(vec1)
+        v2 = np.array(vec2)
+
+        dot_product = np.dot(v1, v2)
+        norm1 = np.linalg.norm(v1)
+        norm2 = np.linalg.norm(v2)
+
+        if norm1 == 0 or norm2 == 0:
+            return 0.0
+
+        return dot_product / (norm1 * norm2)
+
     async def _build_qdrant_filters(
         self, search_request: SearchRequest
-    ) -> Tuple[Filter | None, Filter | None, ndarray | None, ndarray | None]:
-        soft_skills_must = []
-        soft_skills_should = []
-        soft_skills_must_not = []
+    ) -> Tuple[
+        Filter | None, Filter | None, ndarray | None, ndarray | None, ndarray | None
+    ]:
+        soft_skills_must: list[models.FieldCondition] = []
+        soft_skills_should: list[models.FieldCondition] = []
+        soft_skills_must_not: list[models.FieldCondition] = []
 
-        hard_skills_must = []
-        hard_skills_should = []
-        hard_skills_must_not = []
-        filters = search_request.filters
+        hard_skills_must: list[models.FieldCondition] = []
+        hard_skills_should: list[models.FieldCondition] = []
+        hard_skills_must_not: list[models.FieldCondition] = []
+        filters: SearchFilters = search_request.filters
 
         # Векторизуем hard и soft скиллы
 
@@ -152,6 +233,8 @@ class SearchFilter:
             [
                 " ".join([s.lower() for s in filters.skills.must_have] or []),  # type: ignore[union-attr]
                 " ".join([s.lower() for s in filters.skills.should_have] or []),  # type: ignore[union-attr]
+                " ".join([s.lower() for s in filters.description.must_have] or []),  # type: ignore[union-attr]
+                " ".join([s.lower() for s in filters.description.should_have] or []),  # type: ignore[union-attr]
             ]
         ).strip()
 
@@ -176,6 +259,17 @@ class SearchFilter:
         else:
             hard_vector = None
 
+        # Векторизуем must_not_have для последующего фильтра
+        hard_vector_not = []
+        for skill in filters.skills.must_not_have:  # type: ignore[union-attr]
+            vector = MembersEmbeddingSystem.encode_long_text(
+                model=config.HARD_MODEL, text=skill.lower()
+            )
+            hard_vector_not.append(vector)
+
+        if not hard_vector_not:
+            hard_vector_not = None  # type: ignore[assignment]
+
         # Соберем фильтры
 
         # 1 Hard skills фильтры
@@ -191,16 +285,17 @@ class SearchFilter:
                     ]
                 )
 
-            if filters.skills.must_not_have:
-                hard_skills_must_not.extend(
-                    [
-                        models.FieldCondition(
-                            key="skill_name_norm",
-                            match=models.MatchText(text=skill.lower()),
-                        )
-                        for skill in filters.skills.must_not_have
-                    ]
-                )
+            # Сделаем пост обработку где будем исключать найденные id т.к. для каждого скила свой вектор
+            # if filters.skills.must_not_have:
+            #     hard_skills_must_not.extend(
+            #         [
+            #             models.FieldCondition(
+            #                 key="skill_name_norm",
+            #                 match=models.MatchText(text=skill.lower()),
+            #             )
+            #             for skill in filters.skills.must_not_have
+            #         ]
+            #     )
 
             if filters.skills.should_have:
                 hard_skills_should.extend(
@@ -216,62 +311,43 @@ class SearchFilter:
         # 2 Soft skills фильтры
 
         # Summary
-        if filters.summary:
-            if filters.summary.must_have:
-                soft_skills_must.extend(
-                    [
-                        models.FieldCondition(
-                            key="summary_norm",
-                            match=models.MatchText(text=skill.lower()),
-                        )
-                        for skill in filters.summary.must_have
-                    ]
-                )
+        # if filters.summary:
 
-            if filters.summary.must_not_have:
-                soft_skills_must_not.extend(
-                    [
-                        models.FieldCondition(
-                            key="summary_norm",
-                            match=models.MatchText(text=skill.lower()),
-                        )
-                        for skill in filters.summary.must_not_have
-                    ]
-                )
+        # if filters.summary.must_not_have:
+        #     soft_skills_must_not.extend(
+        #         [
+        #             models.FieldCondition(
+        #                 key="summary_norm",
+        #                 match=models.MatchText(text=skill.lower()),
+        #             )
+        #             for skill in filters.summary.must_not_have
+        #         ]
+        #     )
 
-            if filters.summary.should_have:
-                soft_skills_should.extend(
-                    [
-                        models.FieldCondition(
-                            key="summary_norm",
-                            match=models.MatchText(text=skill.lower()),
-                        )
-                        for skill in filters.summary.should_have
-                    ]
-                )
-
-        if filters.description:
-            if filters.description.must_have:
-                soft_skills_must.extend(
-                    [
-                        models.FieldCondition(
-                            key="description_norm",
-                            match=models.MatchText(text=skill.lower()),
-                        )
-                        for skill in filters.description.must_have
-                    ]
-                )
-
-            if filters.description.must_not_have:
-                soft_skills_must_not.extend(
-                    [
-                        models.FieldCondition(
-                            key="description_norm",
-                            match=models.MatchText(text=skill.lower()),
-                        )
-                        for skill in filters.description.must_not_have
-                    ]
-                )
+        # Добавили в векторизацию
+        # if filters.summary.should_have:
+        #     soft_skills_should.extend(
+        #         [
+        #             models.FieldCondition(
+        #                 key="summary_norm",
+        #                 match=models.MatchText(text=skill.lower()),
+        #             )
+        #             for skill in filters.summary.should_have
+        #         ]
+        #     )
+        # Добавили в векторизацию
+        # if filters.description:
+        #
+        #     if filters.description.must_not_have:
+        #         soft_skills_must_not.extend(
+        #             [
+        #                 models.FieldCondition(
+        #                     key="description_norm",
+        #                     match=models.MatchText(text=skill.lower()),
+        #                 )
+        #                 for skill in filters.description.must_not_have
+        #             ]
+        #         )
 
         # 3 Демографические фильтры
         if filters.demographics:
@@ -342,7 +418,7 @@ class SearchFilter:
             filter_hard["must"] = hard_skills_must
         if hard_skills_should:
             filter_hard["should"] = hard_skills_should
-            filter_hard["min_should"] = 1  # type: ignore[assignment]
+            # filter_hard["min_should"] = 1  # type: ignore[assignment]
         if hard_skills_must_not:
             filter_hard["must_not"] = hard_skills_must_not
 
@@ -351,14 +427,14 @@ class SearchFilter:
         if soft_skills_should:
             filter_soft["should"] = soft_skills_should
             # Минимум одно should-условие должно выполниться
-            filter_soft["min_should"] = 1  # type: ignore[assignment]
+            # filter_soft["min_should"] = 1  # type: ignore[assignment]
         if soft_skills_must_not:
             filter_soft["must_not"] = soft_skills_must_not
 
         soft_filter = Filter(**filter_soft) if filter_soft else None
         hard_filter = Filter(**filter_hard) if filter_hard else None
 
-        return soft_filter, hard_filter, soft_vector, hard_vector
+        return soft_filter, hard_filter, soft_vector, hard_vector, hard_vector_not
 
     async def filter_search(
         self,
@@ -380,10 +456,12 @@ class SearchFilter:
             hard_filter,
             soft_vector,
             hard_vector,
+            hard_vector_not,
         ) = await self._build_qdrant_filters(search_request)
 
         return await self._filter_search_entities(
             target_collection=target_collection,
+            hard_vector_not=hard_vector_not,
             soft_vector=soft_vector,
             hard_vector=hard_vector,
             soft_filter=soft_filter,

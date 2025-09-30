@@ -8,7 +8,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.config import QdrantCollection, MembersDataType
 from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import QdrantAPI
-from backend.app.models.embeddings import CandidatePayloadBase, EmployerPayloadBase
 from backend.app.models.match import (
     MatchCreate,
     CandidateMatch,
@@ -16,7 +15,6 @@ from backend.app.models.match import (
 )
 
 T = TypeVar("T", EmployerMatch, CandidateMatch)
-S = TypeVar("S", EmployerPayloadBase, CandidatePayloadBase)
 
 
 class MatchingError(Exception):
@@ -45,7 +43,6 @@ class MatchingService:
             target_collection=QdrantCollection.CANDIDATES.value,
             source_filter={"employer_id": employer_id, "vacancy_id": vacancy_id},
             entity_cls=CandidateMatch,
-            complex_cls=CandidatePayloadBase,
             soft_filter=soft_filter,
             hard_filter=hard_filter,
             top_k=top_k,
@@ -66,7 +63,6 @@ class MatchingService:
             target_collection=QdrantCollection.EMPLOYERS.value,
             source_filter={"user_id": user_id, "resume_id": resume_id},
             entity_cls=EmployerMatch,
-            complex_cls=EmployerPayloadBase,
             soft_filter=soft_filter,
             hard_filter=hard_filter,
             top_k=top_k,
@@ -91,7 +87,6 @@ class MatchingService:
         target_collection: str,
         source_filter: dict,
         entity_cls: Type[T],
-        complex_cls: Type[S],
         soft_filter: Filter | None = None,
         hard_filter: Filter | None = None,
         top_k=10,
@@ -122,6 +117,7 @@ class MatchingService:
         # результаты поиска
         scores: dict[str, float] = {}
         matches: dict[str, T] = {}
+        search_counter = {}
 
         # ищем по hard skills
         for hard in hard_vectors:
@@ -135,12 +131,12 @@ class MatchingService:
                 with_payload=True,
             )
             for res in result.points:
-                complex_key = await complex_cls(**res.payload).get_complex_key()
+                complex_key = await entity_cls(**res.payload).get_complex_key()
                 if complex_key not in matches:
                     matches[complex_key] = entity_cls(**res.payload, id=complex_key)
-                scores[complex_key] = scores.get(
-                    complex_key, 0
-                ) + res.score * alpha / len(hard_vectors)
+                    search_counter[complex_key] = 0
+                scores[complex_key] = scores.get(complex_key, 0) + res.score * alpha
+                search_counter[complex_key] += 1
 
         # ищем по soft skills
         for soft in soft_vectors:
@@ -155,16 +151,21 @@ class MatchingService:
                 with_payload=True,
             )
             for res in result.points:
-                complex_key = await complex_cls(**res.payload).get_complex_key()
+                complex_key = await entity_cls(**res.payload).get_complex_key()
                 if complex_key not in matches:
                     matches[complex_key] = entity_cls(**res.payload, id=complex_key)
+                    search_counter[complex_key] = 0
                 scores[complex_key] = scores.get(complex_key, 0) + res.score * (
                     1 - alpha
-                ) / len(soft_vectors)
+                )
+                search_counter[complex_key] += 1
 
         # проставляем итоговые score
         for m in matches.values():
             m.score = scores.get(m.id, 0)
+            # Усредним оценку, чтобы не было перекосов, если у кого одних векторов больше чем других
+            if search_counter[m.id] > 0:
+                m.score /= search_counter[m.id]
 
         # сортировка и top_k
         return sorted(matches.values(), key=lambda x: x.score, reverse=True)[:top_k]
