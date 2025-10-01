@@ -60,7 +60,8 @@ class MembersEmbeddingSystem:
             skills = [x for x in candidate.skills if x.resume_id == resume.id]
             for skill in skills:
                 embedding_hard = MembersEmbeddingSystem.encode_long_text(
-                    skill.skill_name, self.hard_model
+                    f"{skill.skill_name.lower().strip()}, {skill.description.lower().strip()}",
+                    self.hard_model,
                 )
 
                 payload = CandidatePayloadHard(
@@ -90,7 +91,7 @@ class MembersEmbeddingSystem:
 
         for vacancy in employer.vacancies:
             embedding_soft = MembersEmbeddingSystem.encode_long_text(
-                vacancy.description, self.soft_model
+                vacancy.summary, self.soft_model
             )
 
             payload = EmployerPayloadSoft(
@@ -105,7 +106,6 @@ class MembersEmbeddingSystem:
                 salary_to=vacancy.salary_to,
                 employment_type=vacancy.employment_type,
                 work_mode=vacancy.work_mode,
-                description_norm=vacancy.description.lower().strip(),
                 location_norm=vacancy.location.lower().strip(),
                 employment_type_norm=vacancy.employment_type.lower().strip(),
             )
@@ -122,7 +122,8 @@ class MembersEmbeddingSystem:
             skills = [x for x in employer.skills if x.vacancy_id == vacancy.id]
             for skill in skills:
                 embedding_hard = MembersEmbeddingSystem.encode_long_text(
-                    skill.skill_name, self.hard_model
+                    f"{skill.skill_name.lower().strip()}, {skill.description.lower().strip()}",
+                    self.hard_model,
                 )
 
                 payload = EmployerPayloadHard(

@@ -37,7 +37,8 @@ class SearchFilters(BaseModel):
     summary: Optional[SkillSearch] = None
     description: Optional[SkillSearch] = None
     demographics: Optional[DemographicFilter] = None
-    experience: Optional[ExperienceFilter] = None
+    experience_vacancy: Optional[ExperienceFilter] = None
+    experience_resume: Optional[ExperienceFilter] = None
     salary: Optional[SalaryFilter] = None
     employment: Optional[EmploymentFilter] = None
 
