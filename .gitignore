@@ -1,2 +1,6 @@
 /venv/
 /.env
+/.venv/
+/.ruff_cache/
+/.poetry/
+/.mypy_cache/
