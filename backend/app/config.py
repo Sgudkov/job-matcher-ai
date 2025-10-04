@@ -1,6 +1,8 @@
 # Настройки (API ключи, переменные окружения)
+import os
 from enum import Enum
 
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 from sentence_transformers import SentenceTransformer
 
@@ -25,8 +27,17 @@ HARD_MODEL = SentenceTransformer("sentence-transformers/multi-qa-MiniLM-L6-cos-v
 
 
 class Settings(BaseSettings):
+    load_dotenv()
+
     PROJECT_NAME: str = "job-matcher"
     DEBUG: bool = False
+
+    # Auth
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "")
+    ALGORITHM: str = os.getenv("ALGORITHM", "")
+    ACCESS_TOKEN_EXPIRE_MINUTES: float = float(
+        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 0)
+    )
 
     class Config:
         env_file = ".env"

@@ -5,3 +5,9 @@
 /.poetry/
 /.mypy_cache/
 /backend/alembic.ini
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.idea/
+.vscode/

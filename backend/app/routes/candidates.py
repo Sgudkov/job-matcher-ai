@@ -6,10 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import get_db, qdrant_api
+from backend.app.models.auth import TokenData
 from backend.app.models.candidate import (
     CandidateCreate,
     CandidateUpdate,
 )
+from backend.app.services.dependencies import get_current_active_user
 from backend.app.services.storage import register_candidate
 
 router = APIRouter(prefix="/candidates", tags=["candidates"])
@@ -33,7 +35,11 @@ async def create_candidate(
 
 
 @router.get("/{candidate_id}")
-async def get_candidate(candidate_id: int, db: AsyncSession = Depends(get_db)):
+async def get_candidate(
+    candidate_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(get_current_active_user),
+):
     """Получить данные соискателя"""
     try:
         uow = UnitOfWork(db)

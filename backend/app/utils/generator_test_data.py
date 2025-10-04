@@ -51,7 +51,7 @@ async def call_api_httpx(
 
 async def create_candidate():
     with open("fake_candidates.json", "r", encoding="utf-8") as f:
-        new_data: list = json.load(f)
+        new_data: list = json.load(f)  # type: ignore[annotation-unchecked]
         with open("fake_resumes.json", "r", encoding="utf-8") as r:
             resumes: list = json.load(r)
 

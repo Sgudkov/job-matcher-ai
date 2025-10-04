@@ -133,3 +133,10 @@ class FavoriteVacancyORM(Base):
     user_id = Column(Integer, ForeignKey("candidates.id"))
     vacancy_id = Column(Integer, ForeignKey("vacancies.id"))
     created_at = Column(DateTime, default=datetime.now())
+
+
+class UserORM(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    email = Column(String(50), nullable=False)
+    password = Column(String(100), nullable=False)
