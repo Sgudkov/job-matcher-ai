@@ -22,3 +22,13 @@ repos:
         # args: [--strict]
         # Optional: Specify additional dependencies MyPy needs, if not in your main project dependencies
         # additional_dependencies: ["django-stubs", "types-requests"]
+
+  - repo: local
+    hooks:
+      - id: unittest-all
+        name: Run All Unittests
+        entry: python -m unittest discover -s tests -p "*_test.py" -v
+        language: system
+        types: [ python ]
+        pass_filenames: false
+        always_run: true
