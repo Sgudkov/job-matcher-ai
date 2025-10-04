@@ -11,7 +11,7 @@ __pycache__/
 *.pyd
 .idea/
 .vscode/
-
+*~
 # Node.js
 node_modules/
 frontend/node_modules/
