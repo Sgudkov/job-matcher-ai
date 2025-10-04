@@ -15,6 +15,7 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 # Временная база пользователей (замените на реальную БД)
 fake_users_db = {
     "testuser": {
+        "id": "2026",
         "username": "testuser",
         "full_name": "Test User",
         "email": "test@example.com",
@@ -51,7 +52,7 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.id}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
