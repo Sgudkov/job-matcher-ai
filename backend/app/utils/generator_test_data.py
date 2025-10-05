@@ -1,3 +1,7 @@
+"""
+Модуль для генерации тестовых данных
+"""
+
 import json
 
 import httpx
@@ -15,8 +19,14 @@ async def call_api_httpx(
     method: str = "GET",
     data: Dict = None,  # type: ignore[assignment]
 ) -> Dict[str, Any]:
-    """Вызов API с использованием httpx"""
+    """
+    Вызов API с использованием httpx
 
+    :param url: адрес API
+    :param method: метод запроса
+    :param data: данные для запроса
+    :return: ответ API в формате json
+    """
     async with httpx.AsyncClient(
         verify=False,
         timeout=httpx.Timeout(
@@ -50,6 +60,9 @@ async def call_api_httpx(
 
 
 async def create_candidate():
+    """
+    Создае тестового соискателя со всеми skills
+    """
     with open("fake_candidates.json", "r", encoding="utf-8") as f:
         new_data: list = json.load(f)  # type: ignore[annotation-unchecked]
         with open("fake_resumes.json", "r", encoding="utf-8") as r:
@@ -77,6 +90,9 @@ async def create_candidate():
 
 
 async def remove_qdrant_candidate_skills() -> None:
+    """
+    Удалить все skills для соискателей
+    """
     qdrant_api.client.delete(
         collection_name=QdrantCollection.CANDIDATES.value,
         points_selector=models.FilterSelector(

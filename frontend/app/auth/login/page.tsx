@@ -4,11 +4,11 @@ import { useState } from "react";
 import { fetchUser, login as loginApi } from "../../../lib/api";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../context/AuthContext";
+import LoginForm from "./LoginForm";
 
 export default function LoginPage() {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
   const router = useRouter();
   const { login } = useAuth();
 
@@ -20,21 +20,17 @@ export default function LoginPage() {
       login(res.access_token, userData);
       router.push("/");
     } else {
-      setMessage("Ошибка входа");
+      alert("Неправильное имя пользователя или пароль");
     }
   }
 
   return (
-    <div>
-      <h2>Вход</h2>
-      <form onSubmit={handleSubmit}>
-        <input type="text" placeholder="Username"
-          value={name} onChange={(e) => setName(e.target.value)} />
-        <input type="password" placeholder="Пароль"
-          value={password} onChange={(e) => setPassword(e.target.value)} />
-        <button type="submit">Войти</button>
-      </form>
-      <p>{message}</p>
-    </div>
+    <LoginForm
+    username={name}
+    setUsername={setName}
+    password={password}
+    setPassword={setPassword}
+    onSubmit={handleSubmit} />
+
   );
 }
