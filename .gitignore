@@ -12,6 +12,7 @@ __pycache__/
 .idea/
 .vscode/
 *~
+pytest-cache-*
 # Node.js
 node_modules/
 frontend/node_modules/

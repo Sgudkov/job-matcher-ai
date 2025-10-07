@@ -35,6 +35,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             //Обновляем данные пользователя
             updateUser(token);
         }
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            setUser(JSON.parse(userData));
+        }
         setIsLoading(false);
     }, []);
 
@@ -53,12 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     //Функци входа
     function login(token: string, userData: User) {
         localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
     }
 
     //Функци выхода
     function logout() {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
         setUser(null);
     }
 

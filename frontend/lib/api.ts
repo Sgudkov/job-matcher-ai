@@ -1,3 +1,5 @@
+import { Search } from "../app/types/types";
+
 const API_URL = "http://localhost:8000/api/v1";
 
 
@@ -39,8 +41,6 @@ export async function login(username: string, password: string) {
 
 export async function fetchUser(token: string) {
   const tokenData = decodeToken(token);
-  console.log("tokenData", tokenData);
-  console.log("token", token);
   const res = await fetch(`${API_URL}/candidates/${tokenData.sub}`, {
     method: "GET",
     headers: {
@@ -71,6 +71,17 @@ export async function me() {
   });
   return res.json();
 }
+
+export async function getSearchData(searchParams:Search) {
+  const res = await fetch(`${API_URL}/resumes/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(searchParams),
+  });
+  const data = await res.json();
+  return data;
+}
+
 
 export function logout() {
   localStorage.removeItem("token");

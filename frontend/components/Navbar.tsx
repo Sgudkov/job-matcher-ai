@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../app/context/AuthContext';
-import { useState } from 'react';
+import { User } from '../app/context/AuthContext';
 
 const navbarStyles = {
   backgroundColor: '#333',
@@ -25,6 +25,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
+
 
   const handleLogout = () => {
     logout();
