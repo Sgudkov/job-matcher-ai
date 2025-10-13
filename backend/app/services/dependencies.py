@@ -23,11 +23,18 @@ async def get_current_user(
         if payload is None:
             raise credentials_exception
 
-        _id: str = payload.get("sub", None)
-        if _id is None:
+        user_id_str: str | None = payload.get("sub", None)
+        email: str | None = payload.get("email", None)
+
+        if user_id_str is None:
             raise credentials_exception
 
-        token_data = TokenData(id=_id)
+        try:
+            user_id = int(user_id_str)
+        except (ValueError, TypeError):
+            raise credentials_exception
+
+        token_data = TokenData(id=user_id, email=email)
         return token_data
 
     except JWTError:

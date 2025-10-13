@@ -8,6 +8,7 @@ from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import get_db, qdrant_api
 from backend.app.models.employer import (
     EmployerCreate,
+    EmployerResponse,
     EmployerUpdate,
 )
 from backend.app.services.storage import register_employer
@@ -30,12 +31,16 @@ async def create_employer(employer: EmployerCreate, db: AsyncSession = Depends(g
         raise HTTPException(status_code=500, detail="Error creating employer")
 
 
-@router.get("/{employer_id}")
+@router.get("/{employer_id}", response_model=EmployerResponse)
 async def get_employer(employer_id: int, db: AsyncSession = Depends(get_db)):
     try:
         uow = UnitOfWork(db)
         employer = await uow.employers.get(id_=employer_id)
-        return employer
+        if not employer:
+            raise HTTPException(status_code=404, detail="Employer not found")
+        return EmployerResponse.model_validate(employer)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error getting employer: {e}")
         raise HTTPException(status_code=500, detail="Error getting employer")

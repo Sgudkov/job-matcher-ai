@@ -59,7 +59,7 @@ async def upsert_resume(
 ):
     uow = UnitOfWork(db)
     async with uow.transaction():
-        candidate = CandidateBase.from_orm(
+        candidate = CandidateBase.model_validate(
             await uow.candidates.get(id_=new_resume.candidate_id)
         )
         if not candidate:
@@ -82,10 +82,10 @@ async def upsert_resume(
             for key, value in new_resume.model_dump(exclude={"id"}).items():
                 setattr(resume, key, value)
         else:
-            resume_create = ResumeCreate(**new_resume.dict(exclude={"id"}))
+            resume_create = ResumeCreate(**new_resume.model_dump(exclude={"id"}))
             resume = await uow.resumes.add(resume_create)
             await uow.session.flush()
-            resume = ResumeCreate.from_orm(resume)
+            resume = ResumeCreate.model_validate(resume)
             for skill in skills:
                 skill.resume_id = resume.id
 

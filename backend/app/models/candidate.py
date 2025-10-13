@@ -1,6 +1,6 @@
 from dataclasses import field
 from datetime import datetime
-from typing import List
+from typing import List, Literal
 
 from pydantic import BaseModel
 from qdrant_client.models import PointStruct
@@ -33,7 +33,7 @@ class CandidateBase(BaseModel):
     first_name: str
     last_name: str
     age: int
-    email: str
+    # email: str
     phone: int
 
     class Config:
@@ -50,10 +50,11 @@ class CandidateEmbedding(BaseModel):
 
 
 class CandidateCreate(BaseModel):
+    user_id: int | None = None
     first_name: str
     last_name: str
     age: int
-    email: str
+    # email: str
     phone: int
 
 
@@ -72,3 +73,23 @@ class ResumeCreate(ResumeData):
 
 class ResumeUpsert(ResumeBase):
     pass
+
+
+class CandidateResponse(CandidateBase):
+    """Модель ответа для эндпоинта get_candidate"""
+
+    role: Literal["candidate"] = "candidate"
+
+    class Config:
+        from_attributes = True
+
+
+class RegisterCandidate(BaseModel):
+    """Модель для регистрации кандидата"""
+
+    email: str
+    password: str
+    first_name: str
+    last_name: str
+    age: int
+    phone: int

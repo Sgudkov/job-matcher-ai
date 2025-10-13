@@ -50,6 +50,8 @@ class SearchFilter:
             and soft_vector is None
             and not hard_filter
             and not soft_filter
+            and hard_vector_not is None
+            and soft_vector_not is None
         ):
             return []
 
@@ -92,7 +94,7 @@ class SearchFilter:
             return list(matches.values())
         else:
             # Есть вектора (и, возможно фильтры)
-            if hard_vector is not None:
+            if hard_vector is not None or hard_vector_not is not None:
                 # Ищем по hard_skill
                 result = self.qdrant_api.client.query_points(
                     collection_name=target_collection,
@@ -129,7 +131,7 @@ class SearchFilter:
                     scores[complex_key] = scores.get(complex_key, 0) + res.score * alpha
                     search_counter[complex_key] += 1
 
-            if soft_vector is not None:
+            if soft_vector is not None or soft_vector_not is not None:
                 # Ищем по soft_skill
                 result = self.qdrant_api.client.query_points(
                     collection_name=target_collection,

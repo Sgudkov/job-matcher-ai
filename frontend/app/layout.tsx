@@ -1,5 +1,6 @@
 import Navbar from "../components/Navbar";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import "../styles/globals.css";
 
 export const metadata = {
   title: 'Мое приложение',

@@ -125,5 +125,5 @@ async def remove_qdrant_candidate_skills() -> None:
 if __name__ == "__main__":
     import asyncio
 
-    asyncio.run(create_candidate())
-    # asyncio.run(remove_qdrant_candidate_skills())
+    # asyncio.run(create_candidate())
+    asyncio.run(remove_qdrant_candidate_skills())

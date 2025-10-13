@@ -5,27 +5,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '../app/context/AuthContext';
 import { User } from '../app/context/AuthContext';
 
-const navbarStyles = {
-  backgroundColor: '#333',
-  padding: '1rem',
-  display: 'flex',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-};
-
-const linkStyles = {
-  color: 'white',
-  marginRight: '1rem',
-  textDecoration: 'none',
-};
-
-
 export default function Navbar() {
   const pathname = usePathname();
   const { user, logout, isLoading } = useAuth();
   const router = useRouter();
-
 
   const handleLogout = () => {
     logout();
@@ -33,42 +16,79 @@ export default function Navbar() {
   };
 
   if (pathname.startsWith('/auth')) return (
-    <nav style={navbarStyles}>
-      <Link href="/" style={linkStyles}>Главная</Link>
+    <nav className="bg-gray-800 p-4 flex justify-between items-center shadow-md">
+      <Link href="/" className="text-white mr-4 no-underline hover:text-gray-300 transition-colors">Главная</Link>
     </nav>
   );
 
   if (isLoading) {
     return (
-      <nav style={navbarStyles}>
-        <div>Загрузка...</div>
+      <nav className="bg-gray-800 p-4 flex justify-between items-center shadow-md">
+        <div className="text-white">Загрузка...</div>
       </nav>
     );
   }
 
-
   return (
-    <nav style={navbarStyles}>
-      {/* Блок авторизации */}
-      <div>
-        {user ?
-          (
-            <div>
-              <span style={{ color: 'white' }}>Привет, {user.first_name} </span>
-              <Link href="/profile" style={linkStyles}>Профиль</Link>
-              <Link href="/" style={linkStyles}>Главная</Link>
-              <Link href='/vacancies' style={linkStyles}>Вакансии</Link>
-              <button onClick={handleLogout} style={{ marginLeft: '1rem', backgroundColor: 'transparent', color: 'white', border: 'none', cursor: 'pointer' }}>Выход</button>
-            </div>
-          ) :
-          (
-            <div>
-              <nav >
-                <Link href="/auth/login" style={linkStyles}>Вход</Link>
-                <Link href="/auth/register" style={linkStyles}>Регистрация</Link>
-              </nav>
+    <nav className="bg-gray-800 p-4 shadow-md">
+      <div className="container mx-auto flex justify-between items-center">
+        {/* Левая часть - Логотип и основные ссылки */}
+        <div className="flex items-center gap-6">
+          <Link href="/" className="text-white text-xl font-bold no-underline hover:text-blue-400 transition-colors">
+            Job Matcher AI
+          </Link>
+
+          {user && (
+            <div className="flex items-center gap-4">
+              {/* Для компаний показываем резюме */}
+              {user.role === 'company' && (
+                <Link href='/resumes' className="text-white no-underline hover:text-blue-400 transition-colors">
+                  Резюме кандидатов
+                </Link>
+              )}
+
+              {/* Для кандидатов показываем вакансии */}
+              {user.role === 'candidate' && (
+                <Link href='/vacancies' className="text-white no-underline hover:text-blue-400 transition-colors">
+                  Вакансии
+                </Link>
+              )}
             </div>
           )}
+        </div>
+
+        {/* Правая часть - Пользователь и авторизация */}
+        <div className="flex items-center gap-4">
+          {user ? (
+            <>
+              <span className="text-gray-300">Привет, {user.first_name}</span>
+              <Link href="/profile" className="text-white no-underline hover:text-blue-400 transition-colors">
+                Профиль
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded transition-colors border-none cursor-pointer"
+              >
+                Выход
+              </button>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/auth/login"
+                className="text-white no-underline hover:text-blue-400 transition-colors"
+              >
+                Вход
+              </Link>
+              <Link
+                href="/auth/register"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-colors no-underline"
+              >
+                Регистрация
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

@@ -1,10 +1,13 @@
 # Настройки (API ключи, переменные окружения)
-import os
 from enum import Enum
 
 from dotenv import load_dotenv
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 from sentence_transformers import SentenceTransformer
+
+# Загрузка переменных окружения
+load_dotenv()
 
 
 class QdrantCollection(Enum):
@@ -27,21 +30,29 @@ HARD_MODEL = SentenceTransformer("sentence-transformers/multi-qa-MiniLM-L6-cos-v
 
 
 class Settings(BaseSettings):
-    load_dotenv()
+    """Настройки приложения из переменных окружения"""
 
     PROJECT_NAME: str = "job-matcher"
     DEBUG: bool = False
 
-    # Auth
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "")
-    ALGORITHM: str = os.getenv("ALGORITHM", "")
-    ACCESS_TOKEN_EXPIRE_MINUTES: float = float(
-        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 0)
-    )
+    # Database
+    DATABASE_URL: str = ""
+    DATABASE_SYNC_URL: str = ""
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    # Qdrant
+    QDRANT_URL: str = "http://localhost:6333"
+
+    # Auth
+    SECRET_KEY: str = ""
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: float = 30.0
+
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore",  # Игнорировать дополнительные поля из .env
+    )
 
 
 settings = Settings()

@@ -9,6 +9,7 @@ from backend.app.db.infrastructure.repositories import (
     VacancyRepository,
     VacancySkillRepository,
     MatchRepository,
+    UserRepository,
 )
 
 
@@ -23,6 +24,7 @@ class UnitOfWork:
         self.vacancies = VacancyRepository(session)
         self.vacancy_skills = VacancySkillRepository(session)
         self.matches = MatchRepository(session)
+        self.user = UserRepository(session)
 
     @asynccontextmanager
     async def transaction(self):

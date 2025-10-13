@@ -82,6 +82,15 @@ export async function getSearchData(searchParams:Search) {
   return data;
 }
 
+export async function getSearchResume(searchParams:Search) {
+  const res = await fetch(`${API_URL}/resumes/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(searchParams),
+  });
+  const data = await res.json();
+  return data;
+}
 
 export function logout() {
   localStorage.removeItem("token");

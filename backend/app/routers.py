@@ -1,11 +1,11 @@
 from fastapi import APIRouter
-from routes.candidates import router as candidates_router
-from routes.employers import router as employers_router
-from routes.resumes import router as resumes_router
-from routes.match import router as match_router
-from routes.match import recalc_router
-from routes.vacancies import router as vacancies_router
-from routes.auth import router as auth_router
+from backend.app.routes.candidates import router as candidates_router
+from backend.app.routes.employers import router as employers_router
+from backend.app.routes.resumes import router as resumes_router
+from backend.app.routes.match import router as match_router
+from backend.app.routes.match import recalc_router
+from backend.app.routes.vacancies import router as vacancies_router
+from backend.app.routes.auth import router as auth_router
 
 api_router = APIRouter()
 

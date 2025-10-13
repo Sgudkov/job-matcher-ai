@@ -9,6 +9,7 @@ from backend.app.db.infrastructure.orm import (
     VacancySkillORM,
     CandidateORM,
     MatchORM,
+    UserORM,
 )
 
 
@@ -78,3 +79,17 @@ class MatchRepository(BaseRepository[MatchORM]):
         stmt = select(MatchORM).where(MatchORM.resume_id == resume_id)
         result = await self.session.execute(stmt)
         return result.scalars().all()
+
+
+class UserRepository(BaseRepository[UserORM]):
+    orm_model = UserORM
+
+    async def get_by_email(self, email: str):
+        stmt = select(UserORM).where(UserORM.email == email)
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    async def get_by_id(self, id_: int):
+        stmt = select(UserORM).where(UserORM.id == id_)
+        result = await self.session.execute(stmt)
+        return result.scalar_one_or_none()

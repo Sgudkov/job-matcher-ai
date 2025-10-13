@@ -1,14 +1,23 @@
 # backend/app/api/auth.py
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from datetime import timedelta
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from backend.app.core.security import (
     create_access_token,
     verify_password,
     get_password_hash,
 )
 from backend.app.config import settings
-from backend.app.models.auth import Token, UserInDB
+from backend.app.db.domain.unit_of_work import UnitOfWork
+from backend.app.db.infrastructure.database import get_db
+from backend.app.models.auth import Token, User
+from backend.app.models.candidate import CandidateCreate, RegisterCandidate
+from backend.app.models.employer import EmployerCreate, RegisterEmployer
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -24,25 +33,30 @@ fake_users_db = {
     }
 }
 
-
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
-        return UserInDB(**user_dict)
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
+async def get_user(db, email: str) -> User:
+    uow = UnitOfWork(db)
+    user = await uow.user.get_by_email(email=email)
+    return user
+
+
+async def authenticate_user(db, email: str, password: str):
+    user = await get_user(db, email)
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password):
         return False
     return user
 
 
 @router.post("/token", response_model=Token)
-async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+async def login_for_access_token(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)
+):
+    user = await authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -52,28 +66,99 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.id}, expires_delta=access_token_expires
+        data={"sub": str(user.id), "email": user.email},
+        expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/register")
-async def register_user(
-    username: str, password: str, email: str | None = None, full_name: str | None = None
+@router.post("/register/candidate")
+async def register_candidate(
+    data: RegisterCandidate, db: AsyncSession = Depends(get_db)
 ):
-    if username in fake_users_db:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already registered",
-        )
+    """Регистрация кандидата"""
+    try:
+        uow = UnitOfWork(db)
+        async with uow.transaction():
+            # Проверка email
+            existing_user = await uow.user.get_by_email(email=data.email)
+            if existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already registered",
+                )
 
-    hashed_password = get_password_hash(password)
-    fake_users_db[username] = {
-        "username": username,
-        "email": email,
-        "full_name": full_name,
-        "hashed_password": hashed_password,
-        "disabled": False,
-    }
+            # Создание UserORM
+            hashed_password = get_password_hash(data.password)
+            new_user = await uow.user.add(
+                User(email=data.email, password=hashed_password, is_active=True)
+            )
+            await uow.session.flush()  # Важно! Получить ID
 
-    return {"message": "User created successfully"}
+            # Создание CandidateORM со связью
+            await uow.candidates.add(
+                CandidateCreate(
+                    user_id=new_user.id,  # Связываем с UserORM
+                    first_name=data.first_name,
+                    last_name=data.last_name,
+                    age=data.age,
+                    phone=data.phone,
+                )
+            )
+
+        return {
+            "message": "Candidate registered successfully",
+            "email": data.email,
+            "role": "candidate",
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error registering candidate: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/register/employer")
+async def register_employer(data: RegisterEmployer, db: AsyncSession = Depends(get_db)):
+    """Регистрация работодателя"""
+    try:
+        uow = UnitOfWork(db)
+        async with uow.transaction():
+            # Проверка email
+            existing_user = await uow.user.get_by_email(email=data.email)
+            if existing_user:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already registered",
+                )
+
+            # Создание UserORM
+            hashed_password = get_password_hash(data.password)
+            new_user = await uow.user.add(
+                User(email=data.email, password=hashed_password, is_active=True)
+            )
+            await uow.session.flush()  # Важно! Получить ID
+
+            # Создание EmployerORM со связью
+            await uow.employers.add(
+                EmployerCreate(
+                    user_id=new_user.id,  # Связываем с UserORM
+                    first_name=data.first_name,
+                    last_name=data.last_name,
+                    company_name=data.company_name,
+                    phone=data.phone,
+                )
+            )
+
+        return {
+            "message": "Employer registered successfully",
+            "email": data.email,
+            "role": "company",
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error registering employer: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

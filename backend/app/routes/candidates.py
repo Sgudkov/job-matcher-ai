@@ -9,6 +9,7 @@ from backend.app.db.infrastructure.database import get_db, qdrant_api
 from backend.app.models.auth import TokenData
 from backend.app.models.candidate import (
     CandidateCreate,
+    CandidateResponse,
     CandidateUpdate,
 )
 from backend.app.services.dependencies import get_current_active_user
@@ -34,7 +35,7 @@ async def create_candidate(
         raise HTTPException(status_code=500, detail="Error creating candidate")
 
 
-@router.get("/{candidate_id}")
+@router.get("/{candidate_id}", response_model=CandidateResponse)
 async def get_candidate(
     candidate_id: int,
     db: AsyncSession = Depends(get_db),
@@ -44,7 +45,11 @@ async def get_candidate(
     try:
         uow = UnitOfWork(db)
         candidate = await uow.candidates.get(id_=candidate_id)
-        return candidate
+        if not candidate:
+            raise HTTPException(status_code=404, detail="Candidate not found")
+        return CandidateResponse.model_validate(candidate)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error getting candidate: {e}")
         raise HTTPException(status_code=500, detail="Error getting candidate")

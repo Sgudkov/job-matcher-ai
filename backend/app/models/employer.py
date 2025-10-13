@@ -1,5 +1,6 @@
 from dataclasses import field
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel
 from qdrant_client.http.models import PointStruct
@@ -32,7 +33,7 @@ class EmployerBase(BaseModel):
     id: int = 0
     first_name: str
     last_name: str
-    email: str
+    # email: str
     phone: int
 
     class Config:
@@ -44,10 +45,11 @@ class EmployerEmbedding(BaseModel):
 
 
 class EmployerCreate(BaseModel):
+    user_id: int | None = None
     first_name: str
     last_name: str
     company_name: str
-    email: str
+    # email: str
     phone: int
 
 
@@ -71,3 +73,24 @@ class VacancyCreate(VacancyData):
 class EmployerVector(EmployerBase):
     vacancies: list[VacancyBase] = field(default_factory=list)
     skills: list[VacancySkill] = field(default_factory=list)
+
+
+class EmployerResponse(EmployerBase):
+    """Модель ответа для эндпоинта get_employer"""
+
+    company_name: str
+    role: Literal["company"] = "company"
+
+    class Config:
+        from_attributes = True
+
+
+class RegisterEmployer(BaseModel):
+    """Модель для регистрации работодателя"""
+
+    email: str
+    password: str
+    first_name: str
+    last_name: str
+    company_name: str
+    phone: int

@@ -1,3 +1,6 @@
+from dataclasses import field
+from datetime import datetime
+
 from pydantic import BaseModel
 from typing import Optional
 
@@ -8,15 +11,17 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: Optional[str] = None
+    id: Optional[int] = None
+    email: Optional[str] = None
 
 
 class User(BaseModel):
-    id: str
-    username: str
-    email: Optional[str] = None
-    full_name: Optional[str] = None
-    disabled: Optional[bool] = None
+    id: int | None = None
+    password: str
+    email: str
+    is_active: bool = True
+    created_at: datetime | None = field(default_factory=datetime.now)
+    updated_at: datetime | None = field(default_factory=datetime.now)
 
 
 class UserInDB(User):
