@@ -40,8 +40,8 @@ export default function Navbar() {
 
           {user && (
             <div className="flex items-center gap-4">
-              {/* Для компаний показываем резюме */}
-              {user.role === 'company' && (
+              {/* Для работодателей показываем резюме */}
+              {user.role === 'employer' && (
                 <Link href='/resumes' className="text-white no-underline hover:text-blue-400 transition-colors">
                   Резюме кандидатов
                 </Link>

@@ -13,6 +13,7 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     user_id: Optional[int] = None
     email: Optional[str] = None
+    role: Optional[str] = None  # "candidate" или "employer"
 
 
 class User(BaseModel):

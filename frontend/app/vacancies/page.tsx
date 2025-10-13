@@ -2,8 +2,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getSearchData } from '../../lib/api';
-import { createSearch, FoundResume } from '../types/types';
+import { getSearchVacancy } from '../../lib/api';
+import { createSearch, FoundVacancy } from '../types/types';
 
 export default function VacanciesPage() {
   const [search, setSearch] = useState('');
@@ -13,7 +13,7 @@ export default function VacanciesPage() {
   const [isSummaryExpanded, setIsSummaryExpanded] = useState(true);
   const [isSalaryExpanded, setIsSalaryExpanded] = useState(true);
   const [isExperienceExpanded, setIsExperienceExpanded] = useState(true);
-  const [filteredVacancies, setFilteredVacancies] = useState<FoundResume[] | null>(null);
+  const [filteredVacancies, setFilteredVacancies] = useState<FoundVacancy[] | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const vacanciesPerPage = 10;
 
@@ -36,7 +36,7 @@ export default function VacanciesPage() {
       const searchData = createSearch();
       searchData.filters.skills.must_have = getSkillsArray(skillInputs['Включить'] );
       searchData.filters.skills.must_not_have = getSkillsArray(skillInputs['Исключить']);
-      const res = await getSearchData(searchData);
+      const res = await getSearchVacancy(searchData);
       setFilteredVacancies(res);
     };
     fetchData();
@@ -47,7 +47,7 @@ export default function VacanciesPage() {
     const searchData = createSearch();
     searchData.filters.skills.must_have = getSkillsArray(skillInputs['Включить'] || '');
     searchData.filters.skills.must_not_have = getSkillsArray(skillInputs['Исключить'] || '');
-    getSearchData(searchData).then((res) => {
+    getSearchVacancy(searchData).then((res) => {
       setFilteredVacancies(res);
       setCurrentPage(1);
     });
@@ -216,21 +216,34 @@ export default function VacanciesPage() {
             <div className="flex flex-col gap-7 w-full">
               {currentVacancies.length > 0 ? (
                 currentVacancies.map((vacancy, idx) => (
-                  <div key={vacancy.resume_id} className="w-full mb-2 bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,0.06)] p-8 px-14 flex flex-col items-start gap-3.5 transition-shadow border border-gray-100 hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-gray-300">
-                    <div className="text-[1.3rem] font-bold m-0 mb-1.5 text-gray-800 text-left flex-1">{vacancy.skill_name}</div>
-                    <div className="text-[1.05rem] text-gray-600 m-0 mb-1 font-medium">{vacancy.description}</div>
+                  <div key={vacancy.vacancy_id} className="w-full mb-2 bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,0.06)] p-8 px-14 flex flex-col items-start gap-3.5 transition-shadow border border-gray-100 hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-gray-300">
+                    <div className="flex justify-between items-start w-full">
+                      <div className="text-[1.3rem] font-bold m-0 mb-1.5 text-gray-800 text-left flex-1">{vacancy.summary}</div>
+                      <div className="text-sm font-semibold text-blue-600 bg-blue-50 rounded px-3 py-1">Score: {(vacancy.score * 100).toFixed(0)}%</div>
+                    </div>
                     <div className="flex gap-3 text-gray-500 text-base items-center flex-wrap">
-                      <span>{vacancy.location}</span>
+                      <span>📍 {vacancy.location}</span>
                       <span>•</span>
-                      <span>{vacancy.experience_age}</span>
+                      <span>💼 {vacancy.employment_type}</span>
                       <span>•</span>
-                      <span>{vacancy.location}</span>
+                      <span>🏢 {vacancy.work_mode}</span>
+                      <span>•</span>
+                      <span>📅 Опыт: {vacancy.experience_age_from}-{vacancy.experience_age_to} лет</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {vacancy.skills.map((skill, skillIdx) => (
+                        <span key={skillIdx} className="bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm">
+                          {skill.skill_name} ({skill.experience_age} лет)
+                        </span>
+                      ))}
                     </div>
                     <div className="text-[1.15rem] font-bold text-green-700 bg-green-50 rounded-lg px-5 py-2 m-0 whitespace-nowrap text-right">
-                      {vacancy.salary_from
-                        ? `${vacancy.salary_from.toLocaleString()} ₽`
+                      {vacancy.salary_from && vacancy.salary_to
+                        ? `${vacancy.salary_from.toLocaleString()} - ${vacancy.salary_to.toLocaleString()} ₽`
                         : vacancy.salary_from
-                        ? `${vacancy.salary_to.toLocaleString()} ₽`
+                        ? `от ${vacancy.salary_from.toLocaleString()} ₽`
+                        : vacancy.salary_to
+                        ? `до ${vacancy.salary_to.toLocaleString()} ₽`
                         : 'Зарплата не указана'}
                     </div>
                   </div>

@@ -64,9 +64,24 @@ async def login_for_access_token(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    # Определяем роль пользователя
+    uow = UnitOfWork(db)
+    candidate = await uow.candidates.get_by_user_id(user_id=user.id)
+    employer = await uow.employers.get_by_user_id(user_id=user.id)
+
+    if candidate:
+        role = "candidate"
+    elif employer:
+        role = "employer"
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User has no associated role (candidate or employer)",
+        )
+
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": str(user.id), "email": user.email},
+        data={"sub": str(user.id), "email": user.email, "role": role},
         expires_delta=access_token_expires,
     )
     return {"access_token": access_token, "token_type": "bearer"}

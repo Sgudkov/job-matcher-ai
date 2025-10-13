@@ -84,7 +84,7 @@ export default function HomePage() {
                                     Смотреть вакансии
                                 </Link>
                             </>
-                        ) : (
+                        ) : user.role === 'employer' ? (
                             <>
                                 <p className="text-gray-700 mb-6">
                                     Найдите лучших кандидатов для вашей компании
@@ -96,7 +96,7 @@ export default function HomePage() {
                                     Смотреть резюме
                                 </Link>
                             </>
-                        )}
+                        ) : null}
                     </div>
                 )}
             </div>

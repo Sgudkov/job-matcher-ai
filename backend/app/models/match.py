@@ -8,7 +8,14 @@ from backend.app.models.embeddings import (
 )
 
 
+# ============================================================================
+# ВНУТРЕННИЕ МОДЕЛИ ДЛЯ РАБОТЫ С ВЕКТОРАМИ (используются в filter.py)
+# ============================================================================
+
+
 class CandidateMatch(CandidatePayloadSoft, CandidatePayloadHard):
+    """Внутренняя модель для агрегации векторов кандидата"""
+
     id: str = ""
     score: float = 0
 
@@ -20,6 +27,8 @@ class CandidateMatch(CandidatePayloadSoft, CandidatePayloadHard):
 
 
 class EmployerMatch(EmployerPayloadSoft, EmployerPayloadHard):
+    """Внутренняя модель для агрегации векторов работодателя"""
+
     id: str = ""
     score: float = 0
 
@@ -28,6 +37,72 @@ class EmployerMatch(EmployerPayloadSoft, EmployerPayloadHard):
 
     async def get_key_name_value(self):
         return "vacancy_id", self.vacancy_id
+
+
+# ============================================================================
+# МОДЕЛИ ОТВЕТА ДЛЯ API (используются в routes)
+# ============================================================================
+
+
+class SkillMatch(BaseModel):
+    """Навык с описанием"""
+
+    skill_name: str
+    description: str = ""
+    experience_age: int = 0
+
+
+class ResumeMatchResponse(BaseModel):
+    """Ответ с данными резюме для отображения"""
+
+    # Идентификаторы
+    user_id: int
+    resume_id: int
+
+    # Основная информация (из soft-вектора)
+    summary: str
+    age: int = 0
+    location: str
+    salary_from: int = 0
+    salary_to: int = 0
+    employment_type: str
+    experience_age: int = 0
+    status: str = "active"
+
+    # Навыки (агрегированные из hard-векторов)
+    skills: list[SkillMatch] = []
+
+    # Метрика совпадения
+    score: float = 0.0
+
+
+class VacancyMatchResponse(BaseModel):
+    """Ответ с данными вакансии для отображения"""
+
+    # Идентификаторы
+    employer_id: int
+    vacancy_id: int
+
+    # Основная информация (из soft-вектора)
+    summary: str
+    experience_age_from: int = 0
+    experience_age_to: int = 0
+    location: str
+    salary_from: int = 0
+    salary_to: int = 0
+    employment_type: str
+    work_mode: str = ""
+
+    # Навыки (агрегированные из hard-векторов)
+    skills: list[SkillMatch] = []
+
+    # Метрика совпадения
+    score: float = 0.0
+
+
+# ============================================================================
+# МОДЕЛИ ДЛЯ БД
+# ============================================================================
 
 
 class MatchCreate(BaseModel):

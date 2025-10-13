@@ -7,7 +7,13 @@ from backend.app import config
 from backend.app.config import MembersDataType, QdrantCollection
 from backend.app.db.infrastructure.database import QdrantAPI
 from backend.app.models.filter import SearchRequest, SearchFilters
-from backend.app.models.match import EmployerMatch, CandidateMatch
+from backend.app.models.match import (
+    EmployerMatch,
+    CandidateMatch,
+    ResumeMatchResponse,
+    VacancyMatchResponse,
+    SkillMatch,
+)
 from backend.app.utils.embeddings import MembersEmbeddingSystem
 
 T = TypeVar("T", EmployerMatch, CandidateMatch)
@@ -44,7 +50,7 @@ class SearchFilter:
         search_counter = {}
         matches_to_exclude = set()
 
-        # Если не передали ничего, то возвращаем пустой список
+        # Если не передали ничего, то возвращаем первые 20 совпадений
         if (
             hard_vector is None
             and soft_vector is None
@@ -53,7 +59,28 @@ class SearchFilter:
             and hard_vector_not is None
             and soft_vector_not is None
         ):
-            return []
+            # Получаем первые векторы для определения резюме/вакансий
+            result, _ = self.qdrant_api.client.scroll(
+                collection_name=target_collection,
+                scroll_filter=Filter(),
+                limit=top_k,
+                with_vectors=False,
+                with_payload=True,
+            )
+            for res in result:
+                complex_key = await self.entity_cls(**res.payload).get_complex_key()
+                if complex_key not in matches:
+                    matches[complex_key] = self.entity_cls(
+                        **res.payload, id=complex_key
+                    )  # type: ignore[call-arg]
+
+            # Загружаем ВСЕ векторы для найденных резюме/вакансий
+            entity_keys = {m.id for m in matches.values()}
+            all_vectors = await self._load_all_vectors_for_entities(
+                target_collection=target_collection, entity_keys=entity_keys
+            )
+
+            return all_vectors
 
         if (hard_filter or soft_filter) and hard_vector is None and soft_vector is None:
             # Есть только фильтры
@@ -91,7 +118,14 @@ class SearchFilter:
                     matches[complex_key] = self.entity_cls(
                         **res.payload, id=complex_key
                     )  # type: ignore[call-arg]
-            return list(matches.values())
+
+            # Загружаем ВСЕ векторы для найденных резюме/вакансий
+            entity_keys = {m.id for m in matches.values()}
+            all_vectors = await self._load_all_vectors_for_entities(
+                target_collection=target_collection, entity_keys=entity_keys
+            )
+
+            return all_vectors
         else:
             # Есть вектора (и, возможно фильтры)
             if hard_vector is not None or hard_vector_not is not None:
@@ -179,7 +213,102 @@ class SearchFilter:
             if search_counter[m.id] > 0:
                 m.score /= search_counter[m.id]
 
-        return sorted(matches.values(), key=lambda x: x.score, reverse=True)[:top_k]
+        # Сортируем и берем top_k
+        top_matches = sorted(matches.values(), key=lambda x: x.score, reverse=True)[
+            :top_k
+        ]
+
+        # Загружаем ВСЕ векторы для найденных резюме/вакансий
+        entity_keys = {m.id for m in top_matches if m.id not in matches_to_exclude}
+        all_vectors = await self._load_all_vectors_for_entities(
+            target_collection=target_collection, entity_keys=entity_keys
+        )
+
+        # Проставляем score для всех загруженных векторов
+        for vector in all_vectors:
+            if vector.id in scores:
+                vector.score = scores[vector.id]
+                if search_counter.get(vector.id, 0) > 0:
+                    vector.score /= search_counter[vector.id]
+
+        return all_vectors
+
+    async def _load_all_vectors_for_entities(
+        self,
+        target_collection: str,
+        entity_keys: set[str],
+    ) -> list[T]:
+        """
+        Загружает ВСЕ векторы (soft + hard) для найденных резюме/вакансий.
+
+        Args:
+            target_collection: коллекция Qdrant
+            entity_keys: множество ключей вида "user_id_resume_id" или "employer_id_vacancy_id"
+
+        Returns:
+            Список всех векторов для этих сущностей
+        """
+        all_vectors = []
+
+        for entity_key in entity_keys:
+            # Парсим ключ в зависимости от типа сущности
+            if self.entity_cls is CandidateMatch:
+                # Формат: "user_id_resume_id"
+                parts = entity_key.split("_")
+                if len(parts) >= 2:
+                    resume_id = int(parts[-1])
+
+                    # Загружаем все векторы этого резюме
+                    result, _ = self.qdrant_api.client.scroll(
+                        collection_name=target_collection,
+                        scroll_filter=Filter(
+                            must=[
+                                models.FieldCondition(
+                                    key="resume_id",
+                                    match=models.MatchValue(value=resume_id),
+                                )
+                            ]
+                        ),
+                        limit=100,
+                        with_vectors=False,
+                        with_payload=True,
+                    )
+
+                    for point in result:
+                        # Создаем объект и генерируем уникальный ключ из payload
+                        vector = self.entity_cls(**point.payload)  # type: ignore[call-arg]
+                        vector.id = await vector.get_complex_key()
+                        all_vectors.append(vector)
+
+            elif self.entity_cls is EmployerMatch:
+                # Формат: "employer_id_vacancy_id"
+                parts = entity_key.split("_")
+                if len(parts) >= 2:
+                    vacancy_id = int(parts[-1])
+
+                    # Загружаем все векторы этой вакансии
+                    result, _ = self.qdrant_api.client.scroll(
+                        collection_name=target_collection,
+                        scroll_filter=Filter(
+                            must=[
+                                models.FieldCondition(
+                                    key="vacancy_id",
+                                    match=models.MatchValue(value=vacancy_id),
+                                )
+                            ]
+                        ),
+                        limit=100,
+                        with_vectors=False,
+                        with_payload=True,
+                    )
+
+                    for point in result:
+                        # Создаем объект и генерируем уникальный ключ из payload
+                        vector = self.entity_cls(**point.payload)  # type: ignore[call-arg]
+                        vector.id = await vector.get_complex_key()
+                        all_vectors.append(vector)
+
+        return all_vectors
 
     async def _is_must_excluded(
         self,
@@ -540,3 +669,151 @@ class SearchFilter:
             soft_filter=soft_filter,
             hard_filter=hard_filter,
         )
+
+    @staticmethod
+    def aggregate_resume_matches(
+        matches: list[CandidateMatch],
+    ) -> list[ResumeMatchResponse]:
+        """
+        Агрегирует данные из векторов (soft + hard) в единый ответ для резюме.
+
+        Для каждого резюме:
+        - Берем основные данные из soft-вектора (type="soft_skill")
+        - Собираем все навыки из hard-векторов (type="hard_skill")
+        - Агрегируем score
+        """
+        # Группируем векторы по resume_id и типу
+        grouped: dict[int, dict[str, list[CandidateMatch]]] = {}
+
+        for match in matches:
+            resume_id = match.resume_id
+
+            if resume_id not in grouped:
+                grouped[resume_id] = {"soft_skill": [], "hard_skill": []}
+
+            if match.type == "soft_skill":
+                grouped[resume_id]["soft_skill"].append(match)
+            elif match.type == "hard_skill":
+                grouped[resume_id]["hard_skill"].append(match)
+
+        # Формируем результат
+        result = []
+
+        for resume_id, vectors in grouped.items():
+            # Берем данные из soft-вектора (должен быть один)
+            soft_vectors = vectors["soft_skill"]
+            if not soft_vectors:
+                continue  # Пропускаем резюме без soft-вектора
+
+            soft = soft_vectors[0]  # Берем первый soft-вектор
+
+            # Собираем навыки из hard-векторов
+            skills = []
+            max_score = soft.score
+
+            for hard in vectors["hard_skill"]:
+                if hard.skill_name and hard.skill_name.strip():
+                    skill = SkillMatch(
+                        skill_name=hard.skill_name,
+                        description=hard.description,
+                        experience_age=hard.experience_age,
+                    )
+                    if skill not in skills:
+                        skills.append(skill)
+
+                    # Обновляем максимальный score
+                    max_score = max(max_score, hard.score)
+
+            # Создаем ответ
+            resume_response = ResumeMatchResponse(
+                user_id=soft.user_id,
+                resume_id=soft.resume_id,
+                summary=soft.summary,
+                age=soft.age,
+                location=soft.location,
+                salary_from=soft.salary_from,
+                salary_to=soft.salary_to,
+                employment_type=soft.employment_type,
+                experience_age=soft.experience_age,
+                status=soft.status,
+                skills=skills,
+                score=max_score,
+            )
+
+            result.append(resume_response)
+
+        return result
+
+    @staticmethod
+    def aggregate_vacancy_matches(
+        matches: list[EmployerMatch],
+    ) -> list[VacancyMatchResponse]:
+        """
+        Агрегирует данные из векторов (soft + hard) в единый ответ для вакансии.
+
+        Для каждой вакансии:
+        - Берем основные данные из soft-вектора (type="soft_skill")
+        - Собираем все навыки из hard-векторов (type="hard_skill")
+        - Агрегируем score
+        """
+        # Группируем векторы по vacancy_id и типу
+        grouped: dict[int, dict[str, list[EmployerMatch]]] = {}
+
+        for match in matches:
+            vacancy_id = match.vacancy_id
+
+            if vacancy_id not in grouped:
+                grouped[vacancy_id] = {"soft_skill": [], "hard_skill": []}
+
+            if match.type == "soft_skill":
+                grouped[vacancy_id]["soft_skill"].append(match)
+            elif match.type == "hard_skill":
+                grouped[vacancy_id]["hard_skill"].append(match)
+
+        # Формируем результат
+        result = []
+
+        for vacancy_id, vectors in grouped.items():
+            # Берем данные из soft-вектора (должен быть один)
+            soft_vectors = vectors["soft_skill"]
+            if not soft_vectors:
+                continue  # Пропускаем вакансию без soft-вектора
+
+            soft = soft_vectors[0]  # Берем первый soft-вектор
+
+            # Собираем навыки из hard-векторов
+            skills = []
+            max_score = soft.score
+
+            for hard in vectors["hard_skill"]:
+                if hard.skill_name and hard.skill_name.strip():
+                    skill = SkillMatch(
+                        skill_name=hard.skill_name,
+                        description=hard.description,
+                        experience_age=hard.experience_age,
+                    )
+                    if skill not in skills:
+                        skills.append(skill)
+
+                    # Обновляем максимальный score
+                    max_score = max(max_score, hard.score)
+
+            # Создаем ответ
+            vacancy_response = VacancyMatchResponse(
+                employer_id=soft.employer_id,
+                vacancy_id=soft.vacancy_id,
+                summary=soft.summary,
+                experience_age_from=soft.experience_age_from,
+                experience_age_to=soft.experience_age_to,
+                location=soft.location,
+                salary_from=soft.salary_from,
+                salary_to=soft.salary_to,
+                employment_type=soft.employment_type,
+                work_mode=soft.work_mode,
+                skills=skills,
+                score=max_score,
+            )
+
+            result.append(vacancy_response)
+
+        return result

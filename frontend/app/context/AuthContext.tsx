@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 //Типы
-export type UserRole = 'candidate' | 'company';
+export type UserRole = 'candidate' | 'employer';
 
 export interface User {
     id: number;
@@ -13,7 +13,7 @@ export interface User {
     email: string | null;
     age: number | null;
     phone: string | null;
-    role: UserRole;  // Роль пользователя: кандидат или компания
+    role: UserRole;  // Роль пользователя: кандидат или работодатель
 }
 
 interface AuthContextType {
