@@ -218,8 +218,10 @@ export default function VacanciesPage() {
                 currentVacancies.map((vacancy, idx) => (
                   <div key={vacancy.vacancy_id} className="w-full mb-2 bg-white rounded-[14px] shadow-[0_2px_12px_rgba(0,0,0,0.06)] p-8 px-14 flex flex-col items-start gap-3.5 transition-shadow border border-gray-100 hover:shadow-[0_8px_32px_rgba(0,0,0,0.12)] hover:border-gray-300">
                     <div className="flex justify-between items-start w-full">
-                      <div className="text-[1.3rem] font-bold m-0 mb-1.5 text-gray-800 text-left flex-1">{vacancy.summary}</div>
-                      <div className="text-sm font-semibold text-blue-600 bg-blue-50 rounded px-3 py-1">Score: {(vacancy.score * 100).toFixed(0)}%</div>
+                      <div className="text-[1.3rem] font-bold m-0 mb-1.5 text-gray-800 text-left flex-1">{vacancy.title}</div>
+                      {vacancy.score > 0 && (
+                        <div className="text-sm font-semibold text-blue-600 bg-blue-50 rounded px-3 py-1">Score: {(vacancy.score * 100).toFixed(0)}%</div>
+                      )}
                     </div>
                     <div className="flex gap-3 text-gray-500 text-base items-center flex-wrap">
                       <span>📍 {vacancy.location}</span>

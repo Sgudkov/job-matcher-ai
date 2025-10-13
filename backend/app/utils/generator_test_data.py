@@ -77,18 +77,46 @@ def load_json_file(filename: str) -> List[Dict[str, Any]]:
         return json.load(f)
 
 
+async def get_user_token(base_url: str, email: str, password: str) -> str | None:
+    """
+    Получение токена для пользователя
+
+    :param base_url: базовый URL API
+    :param email: email пользователя
+    :param password: пароль пользователя
+    :return: токен или None
+    """
+    try:
+        url = f"{base_url}/api/v1/auth/token"
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                url,
+                data={
+                    "username": email,
+                    "password": password,
+                },  # OAuth2 использует form data
+            )
+            response.raise_for_status()
+            token_data = response.json()
+            return token_data.get("access_token")
+    except Exception as e:
+        print(f"[ERROR] Не удалось получить токен для {email}: {e}")
+        return None
+
+
 async def register_candidates(
     base_url: str = "http://127.0.0.1:8000",
-) -> Dict[str, int]:
+) -> tuple[Dict[str, int], Dict[str, str]]:
     """
     Регистрация кандидатов из candidates.json
 
     :param base_url: базовый URL API
-    :return: словарь {email: candidate_id}
+    :return: кортеж (словарь {email: candidate_id}, словарь {email: token})
     """
     print("Загрузка кандидатов...")
     candidates_data = load_json_file("candidates.json")
     candidate_ids = {}
+    candidate_tokens = {}
 
     for idx, candidate in enumerate(candidates_data, 1):
         try:
@@ -100,6 +128,13 @@ async def register_candidates(
                 print(
                     f"[OK] Кандидат {candidate['first_name']} {candidate['last_name']} зарегистрирован (ID: {candidate_id})"
                 )
+
+                # Получаем токен для этого кандидата
+                token = await get_user_token(
+                    base_url, candidate["email"], candidate["password"]
+                )
+                if token:
+                    candidate_tokens[candidate["email"]] = token
             else:
                 print(
                     f"[WARNING] Кандидат зарегистрирован, но ID не получен: {candidate['email']}"
@@ -107,27 +142,33 @@ async def register_candidates(
         except Exception as e:
             error_msg = str(e)
             if "Email already registered" in error_msg or "400" in error_msg:
-                # Пользователь уже существует - используем порядковый номер как временный ID
-                print(
-                    f"[INFO] Кандидат {candidate['email']} уже зарегистрирован, используем временный ID: {idx}"
-                )
+                # Пользователь уже существует - получаем токен
+                print(f"[INFO] Кандидат {candidate['email']} уже зарегистрирован")
                 candidate_ids[candidate["email"]] = idx
+                token = await get_user_token(
+                    base_url, candidate["email"], candidate["password"]
+                )
+                if token:
+                    candidate_tokens[candidate["email"]] = token
             else:
                 print(f"[ERROR] Ошибка регистрации кандидата {candidate['email']}: {e}")
 
-    return candidate_ids
+    return candidate_ids, candidate_tokens
 
 
-async def register_employers(base_url: str = "http://127.0.0.1:8000") -> Dict[str, int]:
+async def register_employers(
+    base_url: str = "http://127.0.0.1:8000",
+) -> tuple[Dict[str, int], Dict[str, str]]:
     """
     Регистрация работодателей из employers.json
 
     :param base_url: базовый URL API
-    :return: словарь {email: employer_id}
+    :return: кортеж (словарь {email: employer_id}, словарь {email: token})
     """
     print("\nЗагрузка работодателей...")
     employers_data = load_json_file("employers.json")
     employer_ids = {}
+    employer_tokens = {}
 
     for idx, employer in enumerate(employers_data, 1):
         try:
@@ -139,6 +180,13 @@ async def register_employers(base_url: str = "http://127.0.0.1:8000") -> Dict[st
                 print(
                     f"[OK] Работодатель {employer['company_name']} зарегистрирован (ID: {employer_id})"
                 )
+
+                # Получаем токен для этого работодателя
+                token = await get_user_token(
+                    base_url, employer["email"], employer["password"]
+                )
+                if token:
+                    employer_tokens[employer["email"]] = token
             else:
                 print(
                     f"[WARNING] Работодатель зарегистрирован, но ID не получен: {employer['email']}"
@@ -146,27 +194,33 @@ async def register_employers(base_url: str = "http://127.0.0.1:8000") -> Dict[st
         except Exception as e:
             error_msg = str(e)
             if "Email already registered" in error_msg or "400" in error_msg:
-                # Работодатель уже существует - используем порядковый номер как временный ID
-                print(
-                    f"[INFO] Работодатель {employer['email']} уже зарегистрирован, используем временный ID: {idx}"
-                )
+                # Работодатель уже существует - получаем токен
+                print(f"[INFO] Работодатель {employer['email']} уже зарегистрирован")
                 employer_ids[employer["email"]] = idx
+                token = await get_user_token(
+                    base_url, employer["email"], employer["password"]
+                )
+                if token:
+                    employer_tokens[employer["email"]] = token
             else:
                 print(
                     f"[ERROR] Ошибка регистрации работодателя {employer['email']}: {e}"
                 )
 
-    return employer_ids
+    return employer_ids, employer_tokens
 
 
 async def create_resumes(
-    base_url: str = "http://127.0.0.1:8000", candidate_ids: Dict[str, int] = None
+    base_url: str = "http://127.0.0.1:8000",
+    candidate_ids: Dict[str, int] = None,
+    candidate_tokens: Dict[str, str] = None,
 ) -> None:
     """
     Создание резюме из resumes.json
 
     :param base_url: базовый URL API
     :param candidate_ids: словарь {email: candidate_id} из регистрации
+    :param candidate_tokens: словарь {email: token} из регистрации
     """
     print("\nЗагрузка резюме...")
     resumes_data = load_json_file("resumes.json")
@@ -182,7 +236,10 @@ async def create_resumes(
             # Извлекаем skills из resume
             skills = resume.pop("skills", [])
 
-            # Получаем правильный candidate_id из словаря
+            # Получаем правильный candidate_id и токен из словаря
+            candidate_email = None
+            token = None
+
             if candidate_ids and idx < len(candidates_list):
                 candidate_email = candidates_list[idx]["email"]
                 real_candidate_id = candidate_ids.get(candidate_email)
@@ -191,13 +248,25 @@ async def create_resumes(
                 else:
                     print(f"[WARNING] Не найден candidate_id для {candidate_email}")
 
+                # Получаем токен
+                if candidate_tokens:
+                    token = candidate_tokens.get(candidate_email)
+
+            if not token:
+                print(
+                    f"[ERROR] Нет токена для создания резюме '{resume.get('title', 'Unknown')}'"
+                )
+                continue
+
             # Создаем резюме - FastAPI ожидает JSON с двумя ключами
             url = f"{base_url}/api/v1/resumes/"
 
             async with httpx.AsyncClient(timeout=60.0) as client:
-                # Отправляем как JSON body с правильной структурой для FastAPI
+                # Отправляем как JSON body с токеном авторизации
                 response = await client.post(
-                    url, json={"candidate_resume": resume, "skills": skills}
+                    url,
+                    json={"candidate_resume": resume, "skills": skills},
+                    headers={"Authorization": f"Bearer {token}"},
                 )
                 response.raise_for_status()
 
@@ -216,13 +285,16 @@ async def create_resumes(
 
 
 async def create_vacancies(
-    base_url: str = "http://127.0.0.1:8000", employer_ids: Dict[str, int] = None
+    base_url: str = "http://127.0.0.1:8000",
+    employer_ids: Dict[str, int] = None,
+    employer_tokens: Dict[str, str] = None,
 ) -> None:
     """
     Создание вакансий из vacancies.json
 
     :param base_url: базовый URL API
     :param employer_ids: словарь {email: employer_id} из регистрации
+    :param employer_tokens: словарь {email: token} из регистрации
     """
     print("\nЗагрузка вакансий...")
     vacancies_data = load_json_file("vacancies.json")
@@ -231,13 +303,15 @@ async def create_vacancies(
     if not employer_ids:
         print("[WARNING] Список employer_ids пуст, используются ID из JSON")
 
-    # Создаем маппинг employer_id из JSON -> реальный employer_id
+    # Создаем маппинг employer_id из JSON -> реальный employer_id и email
     employer_id_mapping = {}
+    employer_email_mapping = {}
     if employer_ids:
         for idx, employer in enumerate(employers_list, 1):
             real_id = employer_ids.get(employer["email"])
             if real_id:
                 employer_id_mapping[idx] = real_id
+                employer_email_mapping[idx] = employer["email"]
 
     for vacancy_data in vacancies_data:
         try:
@@ -246,22 +320,37 @@ async def create_vacancies(
             # Извлекаем skills из vacancy
             skills = vacancy.pop("skills", [])
 
-            # Получаем правильный employer_id из маппинга
+            # Получаем правильный employer_id и токен из маппинга
             old_employer_id = vacancy.get("employer_id")
+            employer_email = employer_email_mapping.get(old_employer_id)
+            token = None
+
             if old_employer_id in employer_id_mapping:
                 vacancy["employer_id"] = employer_id_mapping[old_employer_id]
+
+                # Получаем токен
+                if employer_tokens and employer_email:
+                    token = employer_tokens.get(employer_email)
             elif employer_ids:
                 print(
                     f"[WARNING] Не найден employer_id для старого ID {old_employer_id}"
                 )
 
+            if not token:
+                print(
+                    f"[ERROR] Нет токена для создания вакансии '{vacancy.get('title', 'Unknown')}'"
+                )
+                continue
+
             # Создаем вакансию - FastAPI ожидает JSON с двумя ключами
             url = f"{base_url}/api/v1/vacancies/"
 
             async with httpx.AsyncClient(timeout=60.0) as client:
-                # Отправляем как JSON body с правильной структурой для FastAPI
+                # Отправляем как JSON body с токеном авторизации
                 response = await client.post(
-                    url, json={"vacancy": vacancy, "skills": skills}
+                    url,
+                    json={"vacancy": vacancy, "skills": skills},
+                    headers={"Authorization": f"Bearer {token}"},
                 )
                 response.raise_for_status()
 
@@ -290,17 +379,17 @@ async def load_all_test_data(base_url: str = "http://127.0.0.1:8000") -> None:
     print("=" * 60)
 
     try:
-        # 1. Регистрация кандидатов
-        candidate_ids = await register_candidates(base_url)
+        # 1. Регистрация кандидатов и получение токенов
+        candidate_ids, candidate_tokens = await register_candidates(base_url)
 
-        # 2. Регистрация работодателей
-        employer_ids = await register_employers(base_url)
+        # 2. Регистрация работодателей и получение токенов
+        employer_ids, employer_tokens = await register_employers(base_url)
 
-        # 3. Создание резюме (передаем реальные candidate_ids)
-        await create_resumes(base_url, candidate_ids)
+        # 3. Создание резюме (передаем реальные candidate_ids и токены)
+        await create_resumes(base_url, candidate_ids, candidate_tokens)
 
-        # 4. Создание вакансий (передаем реальные employer_ids)
-        await create_vacancies(base_url, employer_ids)
+        # 4. Создание вакансий (передаем реальные employer_ids и токены)
+        await create_vacancies(base_url, employer_ids, employer_tokens)
 
         print("\n" + "=" * 60)
         print("[SUCCESS] Все тестовые данные успешно загружены!")
@@ -350,12 +439,46 @@ async def remove_qdrant_candidate_skills() -> None:
     )
 
 
+async def remove_qdrant_employer_skills() -> None:
+    """
+    Удалить все skills для работодателей
+    """
+    qdrant_api.client.delete(
+        collection_name=QdrantCollection.EMPLOYERS.value,
+        points_selector=models.FilterSelector(
+            filter=models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key="type",
+                        match=models.MatchText(text=MembersDataType.HARD_SKILL.value),
+                    )
+                ]
+            ),
+        ),
+    )
+
+    qdrant_api.client.delete(
+        collection_name=QdrantCollection.EMPLOYERS.value,
+        points_selector=models.FilterSelector(
+            filter=models.Filter(
+                must=[
+                    models.FieldCondition(
+                        key="type",
+                        match=models.MatchText(text=MembersDataType.SOFT_SKILL.value),
+                    )
+                ]
+            ),
+        ),
+    )
+
+
 async def clear_qdrant_data() -> None:
     """
     Очистка данных из Qdrant (опционально)
     """
     print("[CLEAR] Очистка данных из Qdrant...")
     await remove_qdrant_candidate_skills()
+    await remove_qdrant_employer_skills()
     print("[OK] Данные из Qdrant очищены")
 
 

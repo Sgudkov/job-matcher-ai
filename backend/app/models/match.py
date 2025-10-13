@@ -60,7 +60,8 @@ class ResumeMatchResponse(BaseModel):
     resume_id: int
 
     # Основная информация (из soft-вектора)
-    summary: str
+    title: str  # Короткое название резюме
+    summary: str  # Полное описание
     age: int = 0
     location: str
     salary_from: int = 0
@@ -84,7 +85,8 @@ class VacancyMatchResponse(BaseModel):
     vacancy_id: int
 
     # Основная информация (из soft-вектора)
-    summary: str
+    title: str  # Короткое название вакансии
+    summary: str  # Полное описание
     experience_age_from: int = 0
     experience_age_to: int = 0
     location: str

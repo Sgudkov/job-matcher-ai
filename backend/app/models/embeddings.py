@@ -8,6 +8,7 @@ class CandidatePayloadBase(BaseModel):
 
 
 class CandidatePayloadSoft(CandidatePayloadBase):
+    title: str = ""
     summary: str = ""
     age: int = 0
     location: str = ""
@@ -36,6 +37,7 @@ class EmployerPayloadBase(BaseModel):
 
 
 class EmployerPayloadSoft(EmployerPayloadBase):
+    title: str = ""
     summary: str = ""
     experience_age_from: int = 0
     experience_age_to: int = 0

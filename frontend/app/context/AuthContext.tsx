@@ -6,14 +6,15 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 export type UserRole = 'candidate' | 'employer';
 
 export interface User {
+    company_name?: string;
     id: number;
     username: string;
     first_name: string | null;
     last_name: string | null;
-    email: string | null;
+    email: string | null;  // Email может быть получен из токена
     age: number | null;
     phone: string | null;
-    role: UserRole;  // Роль пользователя: кандидат или работодатель
+    role: UserRole;
 }
 
 interface AuthContextType {

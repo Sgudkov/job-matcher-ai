@@ -728,6 +728,7 @@ class SearchFilter:
             resume_response = ResumeMatchResponse(
                 user_id=soft.user_id,
                 resume_id=soft.resume_id,
+                title=soft.title,
                 summary=soft.summary,
                 age=soft.age,
                 location=soft.location,
@@ -802,6 +803,7 @@ class SearchFilter:
             vacancy_response = VacancyMatchResponse(
                 employer_id=soft.employer_id,
                 vacancy_id=soft.vacancy_id,
+                title=soft.title,
                 summary=soft.summary,
                 experience_age_from=soft.experience_age_from,
                 experience_age_to=soft.experience_age_to,
