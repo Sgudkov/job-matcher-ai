@@ -48,6 +48,11 @@ class ResumeSkillRepository(BaseRepository[ResumeSkillORM]):
 class EmployerRepository(BaseRepository[EmployerORM]):
     orm_model = EmployerORM
 
+    async def get_by_user_id(self, user_id: int):
+        stmt = select(EmployerORM).where(EmployerORM.user_id == user_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+
 
 class VacancyRepository(BaseRepository[VacancyORM]):
     orm_model = VacancyORM
