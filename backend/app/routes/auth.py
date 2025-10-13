@@ -96,7 +96,7 @@ async def register_candidate(
             await uow.session.flush()  # Важно! Получить ID
 
             # Создание CandidateORM со связью
-            await uow.candidates.add(
+            new_candidate = await uow.candidates.add(
                 CandidateCreate(
                     user_id=new_user.id,  # Связываем с UserORM
                     first_name=data.first_name,
@@ -105,11 +105,13 @@ async def register_candidate(
                     phone=data.phone,
                 )
             )
+            await uow.session.flush()  # Получить ID кандидата
 
         return {
             "message": "Candidate registered successfully",
             "email": data.email,
             "role": "candidate",
+            "candidate_id": new_candidate.id,
         }
 
     except HTTPException:
@@ -141,7 +143,7 @@ async def register_employer(data: RegisterEmployer, db: AsyncSession = Depends(g
             await uow.session.flush()  # Важно! Получить ID
 
             # Создание EmployerORM со связью
-            await uow.employers.add(
+            new_employer = await uow.employers.add(
                 EmployerCreate(
                     user_id=new_user.id,  # Связываем с UserORM
                     first_name=data.first_name,
@@ -150,11 +152,13 @@ async def register_employer(data: RegisterEmployer, db: AsyncSession = Depends(g
                     phone=data.phone,
                 )
             )
+            await uow.session.flush()  # Получить ID работодателя
 
         return {
             "message": "Employer registered successfully",
             "email": data.email,
             "role": "company",
+            "employer_id": new_employer.id,
         }
 
     except HTTPException:

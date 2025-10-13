@@ -59,11 +59,11 @@ async def upsert_resume(
 ):
     uow = UnitOfWork(db)
     async with uow.transaction():
-        candidate = CandidateBase.model_validate(
-            await uow.candidates.get(id_=new_resume.candidate_id)
-        )
-        if not candidate:
+        candidate_orm = await uow.candidates.get(id_=new_resume.candidate_id)
+        if not candidate_orm:
             raise Exception("Upsert resume: Candidate not found")
+
+        candidate = CandidateBase.model_validate(candidate_orm)
 
         resumes = await uow.resumes.get_by_candidate_id(
             candidate_id=new_resume.candidate_id
@@ -131,11 +131,11 @@ async def upsert_vacancy(
 ):
     uow = UnitOfWork(db)
     async with uow.transaction():
-        employer = EmployerBase.from_orm(
-            await uow.employers.get(id_=new_vacancy.employer_id)
-        )
-        if not employer:
-            raise Exception("Upsert vacancy: Vacancy not found")
+        employer_orm = await uow.employers.get(id_=new_vacancy.employer_id)
+        if not employer_orm:
+            raise Exception("Upsert vacancy: Employer not found")
+
+        employer = EmployerBase.model_validate(employer_orm)
 
         vacancies = await uow.vacancies.get_by_employer_id(
             employer_id=new_vacancy.employer_id
@@ -151,10 +151,10 @@ async def upsert_vacancy(
             for key, value in new_vacancy.model_dump(exclude={"id"}).items():
                 setattr(vacancy, key, value)
         else:
-            create_vacancy = VacancyCreate(**new_vacancy.dict(exclude={"id"}))
+            create_vacancy = VacancyCreate(**new_vacancy.model_dump(exclude={"id"}))
             vacancy = await uow.vacancies.add(create_vacancy)
             await uow.session.flush()
-            vacancy = VacancyCreate.from_orm(vacancy)
+            vacancy = VacancyCreate.model_validate(vacancy)
             for skill in skills:
                 skill.vacancy_id = vacancy.id
 

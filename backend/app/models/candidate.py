@@ -35,6 +35,7 @@ class CandidateBase(BaseModel):
     age: int
     # email: str
     phone: int
+    user_id: int | None = None
 
     class Config:
         from_attributes = True

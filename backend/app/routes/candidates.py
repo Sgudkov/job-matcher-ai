@@ -8,12 +8,10 @@ from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import get_db, qdrant_api
 from backend.app.models.auth import TokenData
 from backend.app.models.candidate import (
-    CandidateCreate,
     CandidateResponse,
     CandidateUpdate,
 )
 from backend.app.services.dependencies import get_current_active_user
-from backend.app.services.storage import register_candidate
 
 router = APIRouter(prefix="/candidates", tags=["candidates"])
 
@@ -21,38 +19,34 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-@router.post("/")
-async def create_candidate(
-    candidate: CandidateCreate, db: AsyncSession = Depends(get_db)
-):
-    """Создать соискателя"""
-    try:
-        new_candidate = await register_candidate(candidate, db)
-        return new_candidate
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Error creating candidate: {e}")
-        raise HTTPException(status_code=500, detail="Error creating candidate")
-
-
-@router.get("/{candidate_id}", response_model=CandidateResponse)
+@router.get("/", response_model=CandidateResponse)
 async def get_candidate(
-    candidate_id: int,
     db: AsyncSession = Depends(get_db),
     current_user: TokenData = Depends(get_current_active_user),
 ):
     """Получить данные соискателя"""
     try:
+        if not current_user.user_id:
+            raise HTTPException(
+                status_code=401, detail="Invalid token: user_id missing"
+            )
+
+        logger.info(f"Getting candidate for user_id: {current_user.user_id}")
         uow = UnitOfWork(db)
-        candidate = await uow.candidates.get(id_=candidate_id)
+        candidate = await uow.candidates.get_by_user_id(user_id=current_user.user_id)
+        logger.info(f"Candidate found: {candidate}")
+
         if not candidate:
             raise HTTPException(status_code=404, detail="Candidate not found")
+
         return CandidateResponse.model_validate(candidate)
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"Error getting candidate: {e}")
-        raise HTTPException(status_code=500, detail="Error getting candidate")
+        logger.error(f"Error getting candidate: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500, detail=f"Error getting candidate: {str(e)}"
+        )
 
 
 @router.patch("/")

@@ -18,6 +18,7 @@ repos:
     rev: v1.10.0 # Use the latest stable MyPy version
     hooks:
       - id: mypy
+        exclude: ^backend/app/utils/generator_test_data\.py$
         # Optional: Add arguments to MyPy, e.g., --strict
         # args: [--strict]
         # Optional: Specify additional dependencies MyPy needs, if not in your main project dependencies

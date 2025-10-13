@@ -7,28 +7,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import get_db, qdrant_api
 from backend.app.models.employer import (
-    EmployerCreate,
     EmployerResponse,
     EmployerUpdate,
 )
-from backend.app.services.storage import register_employer
 
 router = APIRouter(prefix="/employers", tags=["employers"])
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-@router.post("/")
-async def create_employer(employer: EmployerCreate, db: AsyncSession = Depends(get_db)):
-    try:
-        new_employer = await register_employer(employer, db)
-
-        return new_employer
-    except Exception as e:
-        await db.rollback()
-        logger.error(f"Error creating employer: {e}")
-        raise HTTPException(status_code=500, detail="Error creating employer")
 
 
 @router.get("/{employer_id}", response_model=EmployerResponse)

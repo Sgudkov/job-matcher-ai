@@ -99,6 +99,23 @@ run-prod:
 
 
 # ============================================================================
+# ЗАГРУЗКА ТЕСТОВЫХ ДАННЫХ
+# ============================================================================
+
+load-data:
+	poetry run python -m backend.app.utils.generator_test_data
+
+load-data-fresh:
+	@echo "Очистка БД и загрузка свежих данных..."
+	$(MAKE) down
+	$(MAKE) up
+	$(MAKE) load-data
+
+clear-qdrant:
+	poetry run python -m backend.app.utils.generator_test_data --clear-qdrant
+
+
+# ============================================================================
 # ОЧИСТКА
 # ============================================================================
 
@@ -178,6 +195,11 @@ help:
 	@echo "  make run              - Запустить dev сервер"
 	@echo "  make run-prod         - Запустить prod сервер"
 	@echo ""
+	@echo "ТЕСТОВЫЕ ДАННЫЕ:"
+	@echo "  make load-data        - Загрузить тестовые данные из JSON"
+	@echo "  make load-data-fresh  - Очистить БД и загрузить свежие данные"
+	@echo "  make clear-qdrant     - Очистить данные из Qdrant"
+	@echo ""
 	@echo "DOCKER:"
 	@echo "  make docker-up        - Запустить Docker контейнеры"
 	@echo "  make docker-down      - Остановить Docker контейнеры"
@@ -189,5 +211,5 @@ help:
         test-resumes test-vacancies test-matches test-integration test-cov \
         alembic-revision alembic-upgrade alembic-downgrade alembic-current \
         alembic-history pre-commit lint lint-fix format format-check run \
-        run-prod clean docker-build docker-up docker-down docker-logs \
-        docker-restart help rev up down curr hist
+        run-prod load-data load-data-fresh clear-qdrant clean docker-build \
+        docker-up docker-down docker-logs docker-restart help rev up down curr hist

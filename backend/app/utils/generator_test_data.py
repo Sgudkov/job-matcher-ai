@@ -1,17 +1,18 @@
 """
-Модуль для генерации тестовых данных
+Модуль для генерации и загрузки тестовых данных
+Загружает данные из JSON файлов в базу данных через API
 """
 
 import json
+from pathlib import Path
 
 import httpx
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from qdrant_client.http.models import models
 
 from backend.app.config import QdrantCollection, MembersDataType
 from backend.app.db.infrastructure.database import qdrant_api
-from backend.app.models.candidate import CandidateCreate, ResumeUpsert
 
 
 async def call_api_httpx(
@@ -59,34 +60,261 @@ async def call_api_httpx(
             raise
 
 
-async def create_candidate():
+def load_json_file(filename: str) -> List[Dict[str, Any]]:
     """
-    Создае тестового соискателя со всеми skills
+    Загрузка данных из JSON файла
+
+    :param filename: имя файла в папке utils
+    :return: список данных из JSON
     """
-    with open("fake_candidates.json", "r", encoding="utf-8") as f:
-        new_data: list = json.load(f)  # type: ignore[annotation-unchecked]
-        with open("fake_resumes.json", "r", encoding="utf-8") as r:
-            resumes: list = json.load(r)
+    current_dir = Path(__file__).parent
+    file_path = current_dir / filename
 
-        for data, resume in zip(new_data, resumes):
-            candidate = CandidateCreate(**data)
-            url = "http://127.0.0.1:8000/api/v1/candidates/"
-            response = await call_api_httpx(url, method="POST", data=candidate.dict())
-            candidate_id = response.get("id")
+    if not file_path.exists():
+        raise FileNotFoundError(f"Файл {file_path} не найден")
 
-            new_resume = ResumeUpsert(**resume.get("candidate_resume"))
-            new_resume.candidate_id = candidate_id
-            skills: list = resume.get("skills")
-            new_skills: list = [skill for skill in skills]
-            url = "http://127.0.0.1:8000/api/v1/resumes/"
-            await call_api_httpx(
-                url,
-                method="POST",
-                data={
-                    "candidate_resume": new_resume.model_dump(),
-                    "skills": new_skills,
-                },
+    with open(file_path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+async def register_candidates(
+    base_url: str = "http://127.0.0.1:8000",
+) -> Dict[str, int]:
+    """
+    Регистрация кандидатов из candidates.json
+
+    :param base_url: базовый URL API
+    :return: словарь {email: candidate_id}
+    """
+    print("Загрузка кандидатов...")
+    candidates_data = load_json_file("candidates.json")
+    candidate_ids = {}
+
+    for idx, candidate in enumerate(candidates_data, 1):
+        try:
+            url = f"{base_url}/api/v1/auth/register/candidate"
+            response = await call_api_httpx(url, method="POST", data=candidate)
+            candidate_id = response.get("candidate_id")
+            if candidate_id:
+                candidate_ids[candidate["email"]] = candidate_id
+                print(
+                    f"[OK] Кандидат {candidate['first_name']} {candidate['last_name']} зарегистрирован (ID: {candidate_id})"
+                )
+            else:
+                print(
+                    f"[WARNING] Кандидат зарегистрирован, но ID не получен: {candidate['email']}"
+                )
+        except Exception as e:
+            error_msg = str(e)
+            if "Email already registered" in error_msg or "400" in error_msg:
+                # Пользователь уже существует - используем порядковый номер как временный ID
+                print(
+                    f"[INFO] Кандидат {candidate['email']} уже зарегистрирован, используем временный ID: {idx}"
+                )
+                candidate_ids[candidate["email"]] = idx
+            else:
+                print(f"[ERROR] Ошибка регистрации кандидата {candidate['email']}: {e}")
+
+    return candidate_ids
+
+
+async def register_employers(base_url: str = "http://127.0.0.1:8000") -> Dict[str, int]:
+    """
+    Регистрация работодателей из employers.json
+
+    :param base_url: базовый URL API
+    :return: словарь {email: employer_id}
+    """
+    print("\nЗагрузка работодателей...")
+    employers_data = load_json_file("employers.json")
+    employer_ids = {}
+
+    for idx, employer in enumerate(employers_data, 1):
+        try:
+            url = f"{base_url}/api/v1/auth/register/employer"
+            response = await call_api_httpx(url, method="POST", data=employer)
+            employer_id = response.get("employer_id")
+            if employer_id:
+                employer_ids[employer["email"]] = employer_id
+                print(
+                    f"[OK] Работодатель {employer['company_name']} зарегистрирован (ID: {employer_id})"
+                )
+            else:
+                print(
+                    f"[WARNING] Работодатель зарегистрирован, но ID не получен: {employer['email']}"
+                )
+        except Exception as e:
+            error_msg = str(e)
+            if "Email already registered" in error_msg or "400" in error_msg:
+                # Работодатель уже существует - используем порядковый номер как временный ID
+                print(
+                    f"[INFO] Работодатель {employer['email']} уже зарегистрирован, используем временный ID: {idx}"
+                )
+                employer_ids[employer["email"]] = idx
+            else:
+                print(
+                    f"[ERROR] Ошибка регистрации работодателя {employer['email']}: {e}"
+                )
+
+    return employer_ids
+
+
+async def create_resumes(
+    base_url: str = "http://127.0.0.1:8000", candidate_ids: Dict[str, int] = None
+) -> None:
+    """
+    Создание резюме из resumes.json
+
+    :param base_url: базовый URL API
+    :param candidate_ids: словарь {email: candidate_id} из регистрации
+    """
+    print("\nЗагрузка резюме...")
+    resumes_data = load_json_file("resumes.json")
+    candidates_list = load_json_file("candidates.json")
+
+    if not candidate_ids:
+        print("[WARNING] Список candidate_ids пуст, используются ID из JSON")
+
+    for idx, resume_data in enumerate(resumes_data):
+        try:
+            # Создаем копию, чтобы не изменять оригинальные данные
+            resume = resume_data.copy()
+            # Извлекаем skills из resume
+            skills = resume.pop("skills", [])
+
+            # Получаем правильный candidate_id из словаря
+            if candidate_ids and idx < len(candidates_list):
+                candidate_email = candidates_list[idx]["email"]
+                real_candidate_id = candidate_ids.get(candidate_email)
+                if real_candidate_id:
+                    resume["candidate_id"] = real_candidate_id
+                else:
+                    print(f"[WARNING] Не найден candidate_id для {candidate_email}")
+
+            # Создаем резюме - FastAPI ожидает JSON с двумя ключами
+            url = f"{base_url}/api/v1/resumes/"
+
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                # Отправляем как JSON body с правильной структурой для FastAPI
+                response = await client.post(
+                    url, json={"candidate_resume": resume, "skills": skills}
+                )
+                response.raise_for_status()
+
+            print(
+                f"[OK] Резюме '{resume['title']}' создано для кандидата ID: {resume['candidate_id']}"
             )
+        except httpx.HTTPStatusError as e:
+            print(
+                f"[HTTP ERROR] Создание резюме '{resume_data.get('title', 'Unknown')}': {e.response.status_code}"
+            )
+            print(f"  Детали: {e.response.text}")
+        except Exception as e:
+            print(
+                f"[ERROR] Создание резюме '{resume_data.get('title', 'Unknown')}': {e}"
+            )
+
+
+async def create_vacancies(
+    base_url: str = "http://127.0.0.1:8000", employer_ids: Dict[str, int] = None
+) -> None:
+    """
+    Создание вакансий из vacancies.json
+
+    :param base_url: базовый URL API
+    :param employer_ids: словарь {email: employer_id} из регистрации
+    """
+    print("\nЗагрузка вакансий...")
+    vacancies_data = load_json_file("vacancies.json")
+    employers_list = load_json_file("employers.json")
+
+    if not employer_ids:
+        print("[WARNING] Список employer_ids пуст, используются ID из JSON")
+
+    # Создаем маппинг employer_id из JSON -> реальный employer_id
+    employer_id_mapping = {}
+    if employer_ids:
+        for idx, employer in enumerate(employers_list, 1):
+            real_id = employer_ids.get(employer["email"])
+            if real_id:
+                employer_id_mapping[idx] = real_id
+
+    for vacancy_data in vacancies_data:
+        try:
+            # Создаем копию, чтобы не изменять оригинальные данные
+            vacancy = vacancy_data.copy()
+            # Извлекаем skills из vacancy
+            skills = vacancy.pop("skills", [])
+
+            # Получаем правильный employer_id из маппинга
+            old_employer_id = vacancy.get("employer_id")
+            if old_employer_id in employer_id_mapping:
+                vacancy["employer_id"] = employer_id_mapping[old_employer_id]
+            elif employer_ids:
+                print(
+                    f"[WARNING] Не найден employer_id для старого ID {old_employer_id}"
+                )
+
+            # Создаем вакансию - FastAPI ожидает JSON с двумя ключами
+            url = f"{base_url}/api/v1/vacancies/"
+
+            async with httpx.AsyncClient(timeout=60.0) as client:
+                # Отправляем как JSON body с правильной структурой для FastAPI
+                response = await client.post(
+                    url, json={"vacancy": vacancy, "skills": skills}
+                )
+                response.raise_for_status()
+
+            print(
+                f"[OK] Вакансия '{vacancy['title']}' создана для работодателя ID: {vacancy['employer_id']}"
+            )
+        except httpx.HTTPStatusError as e:
+            print(
+                f"[HTTP ERROR] Создание вакансии '{vacancy_data.get('title', 'Unknown')}': {e.response.status_code}"
+            )
+            print(f"  Детали: {e.response.text}")
+        except Exception as e:
+            print(
+                f"[ERROR] Создание вакансии '{vacancy_data.get('title', 'Unknown')}': {e}"
+            )
+
+
+async def load_all_test_data(base_url: str = "http://127.0.0.1:8000") -> None:
+    """
+    Загрузка всех тестовых данных в базу
+
+    :param base_url: базовый URL API
+    """
+    print("=" * 60)
+    print("Начало загрузки тестовых данных")
+    print("=" * 60)
+
+    try:
+        # 1. Регистрация кандидатов
+        candidate_ids = await register_candidates(base_url)
+
+        # 2. Регистрация работодателей
+        employer_ids = await register_employers(base_url)
+
+        # 3. Создание резюме (передаем реальные candidate_ids)
+        await create_resumes(base_url, candidate_ids)
+
+        # 4. Создание вакансий (передаем реальные employer_ids)
+        await create_vacancies(base_url, employer_ids)
+
+        print("\n" + "=" * 60)
+        print("[SUCCESS] Все тестовые данные успешно загружены!")
+        print("=" * 60)
+        print("Статистика:")
+        print(f"  - Кандидатов: {len(candidate_ids)}")
+        print(f"  - Работодателей: {len(employer_ids)}")
+        print(f"  - Резюме: {len(load_json_file('resumes.json'))}")
+        print(f"  - Вакансий: {len(load_json_file('vacancies.json'))}")
+        print("=" * 60)
+
+    except Exception as e:
+        print(f"\n[ERROR] Ошибка при загрузке данных: {e}")
+        raise
 
 
 async def remove_qdrant_candidate_skills() -> None:
@@ -122,8 +350,33 @@ async def remove_qdrant_candidate_skills() -> None:
     )
 
 
+async def clear_qdrant_data() -> None:
+    """
+    Очистка данных из Qdrant (опционально)
+    """
+    print("[CLEAR] Очистка данных из Qdrant...")
+    await remove_qdrant_candidate_skills()
+    print("[OK] Данные из Qdrant очищены")
+
+
 if __name__ == "__main__":
     import asyncio
+    import sys
 
-    # asyncio.run(create_candidate())
-    asyncio.run(remove_qdrant_candidate_skills())
+    # Использование:
+    # python generator_test_data.py                    - загрузить все данные
+    # python generator_test_data.py --clear-qdrant     - очистить Qdrant
+    # python generator_test_data.py --url http://...   - указать другой URL API
+
+    base_url = "http://127.0.0.1:8000"
+
+    # Парсинг аргументов командной строки
+    if "--clear-qdrant" in sys.argv:
+        asyncio.run(clear_qdrant_data())
+    elif "--url" in sys.argv:
+        url_index = sys.argv.index("--url") + 1
+        if url_index < len(sys.argv):
+            base_url = sys.argv[url_index]
+        asyncio.run(load_all_test_data(base_url))
+    else:
+        asyncio.run(load_all_test_data(base_url))

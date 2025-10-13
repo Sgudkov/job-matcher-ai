@@ -16,12 +16,22 @@ from backend.app.db.infrastructure.orm import (
 class CandidateRepository(BaseRepository[CandidateORM]):
     orm_model = CandidateORM
 
+    async def get_by_user_id(self, user_id: int):
+        stmt = select(CandidateORM).where(CandidateORM.user_id == user_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().first()
+
 
 class ResumeRepository(BaseRepository[ResumeORM]):
     orm_model = ResumeORM
 
     async def get_by_candidate_id(self, candidate_id: int):
         stmt = select(ResumeORM).where(ResumeORM.candidate_id == candidate_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
+    async def get_by_user_id(self, user_id: int):
+        stmt = select(ResumeORM).where(ResumeORM.user_id == user_id)
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
