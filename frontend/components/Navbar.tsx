@@ -35,7 +35,7 @@ export default function Navbar() {
         {/* Левая часть - Логотип и основные ссылки */}
         <div className="flex items-center gap-6">
           <Link href="/" className="text-white text-xl font-bold no-underline hover:text-blue-400 transition-colors">
-            Job Matcher AI
+            IdealMatch.dev
           </Link>
 
           {user && (

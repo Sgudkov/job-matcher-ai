@@ -6,7 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import get_db, QdrantAPI, qdrant_api
 from backend.app.models.auth import TokenData
-from backend.app.models.employer import EmployerVacancyUpsert, VacancySkill
+from backend.app.models.employer import (
+    EmployerVacancyUpsert,
+    VacancySkill,
+    VacancyBase,
+    EmployerBase,
+    VacancyResponse,
+)
 from backend.app.models.filter import SearchRequest
 from backend.app.models.match import EmployerMatch
 from backend.app.services.dependencies import get_current_active_user
@@ -52,13 +58,13 @@ async def modify_vacancy(
         raise HTTPException(status_code=500, detail=f"Error creating vacancy: {str(e)}")
 
 
-@router.get("/{id}")
+@router.get("/{id_}")
 async def get_vacancy(
     id_: int,
     db: AsyncSession = Depends(get_db),
     current_user: TokenData = Depends(get_current_active_user),
 ):
-    """Получить вакансию по ID (только свою)"""
+    """Получить вакансию по ID"""
     try:
         if not current_user.user_id:
             raise HTTPException(
@@ -66,18 +72,26 @@ async def get_vacancy(
             )
 
         uow = UnitOfWork(db)
-        vacancy = await uow.vacancies.get(id_=id_)
-        if not vacancy:
+        vacancy_orm = await uow.vacancies.get(id_=id_)
+        if not vacancy_orm:
             raise HTTPException(status_code=404, detail="Vacancy not found")
 
-        # Проверяем, что вакансия принадлежит текущему пользователю
-        employer = await uow.employers.get_by_user_id(user_id=current_user.user_id)
-        if not employer or vacancy.employer_id != employer.id:
-            raise HTTPException(
-                status_code=403, detail="Access denied: not your vacancy"
-            )
+        vacancy = VacancyBase.model_validate(vacancy_orm.__dict__)
 
-        return vacancy
+        employer = await uow.employers.get(id_=vacancy.employer_id)
+
+        if not employer:
+            raise HTTPException(status_code=404, detail="Employer not found")
+
+        employer = EmployerBase.model_validate(employer.__dict__)
+
+        skills_data = await uow.vacancy_skills.get_skills_by_vacancy_id(vacancy.id)
+        skills = [VacancySkill.model_validate(skill) for skill in skills_data]
+        response = VacancyResponse(
+            vacancy_description=vacancy, employer=employer, skills=skills
+        )
+
+        return response
     except HTTPException:
         raise
     except Exception as e:

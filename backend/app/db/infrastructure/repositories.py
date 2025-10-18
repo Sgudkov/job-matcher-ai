@@ -44,6 +44,11 @@ class ResumeSkillRepository(BaseRepository[ResumeSkillORM]):
         result = await self.session.execute(stmt)
         return result.rowcount > 0
 
+    async def get_all_by_resume_id(self, resume_id: int):
+        stmt = select(ResumeSkillORM).where(ResumeSkillORM.resume_id == resume_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
 
 class EmployerRepository(BaseRepository[EmployerORM]):
     orm_model = EmployerORM
@@ -70,6 +75,11 @@ class VacancySkillRepository(BaseRepository[VacancySkillORM]):
         stmt = delete(VacancySkillORM).where(VacancySkillORM.vacancy_id == vacancy_id)
         result = await self.session.execute(stmt)
         return result.rowcount > 0
+
+    async def get_skills_by_vacancy_id(self, vacancy_id: int):
+        stmt = select(VacancySkillORM).where(VacancySkillORM.vacancy_id == vacancy_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
 
 
 class MatchRepository(BaseRepository[MatchORM]):

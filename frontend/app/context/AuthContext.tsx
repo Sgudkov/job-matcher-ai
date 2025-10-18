@@ -17,6 +17,7 @@ export interface User {
     role: UserRole;
 }
 
+
 interface AuthContextType {
     user: User | null;
     login: (token: string, userData: User) => void;

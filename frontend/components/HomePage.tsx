@@ -12,12 +12,11 @@ export default function HomePage() {
                 {/* Hero Section */}
                 <div className="text-center mb-16">
                     <h1 className="text-5xl font-bold text-gray-800 mb-4">
-                        Добро пожаловать в Job Matcher AI
+                        Добро пожаловать в IdealMatch.dev
                     </h1>
                     <p className="text-xl text-gray-600 mb-8">
-                        Умный подбор вакансий и резюме с помощью искусственного интеллекта
+                        Умный подбор вакансий и резюме с помощью идеального сопоставления
                     </p>
-
                     {!user && (
                         <div className="flex gap-4 justify-center">
                             <Link

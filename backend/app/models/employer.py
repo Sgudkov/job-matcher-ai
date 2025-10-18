@@ -11,6 +11,9 @@ class VacancySkill(BaseModel):
     skill_name: str = ""
     description: str = ""
 
+    class Config:
+        from_attributes = True
+
 
 class VacancyData(BaseModel):
     employer_id: int = 0
@@ -94,3 +97,12 @@ class RegisterEmployer(BaseModel):
     last_name: str
     company_name: str
     phone: int
+
+
+class VacancyResponse(BaseModel):
+    vacancy_description: VacancyBase
+    skills: list[VacancySkill] = []
+    employer: EmployerBase
+
+    class Config:
+        from_attributes = True

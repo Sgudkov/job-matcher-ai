@@ -11,6 +11,9 @@ class ResumeSkillBase(BaseModel):
     skill_name: str = ""
     description: str = ""
 
+    class Config:
+        from_attributes = True
+
 
 class ResumeData(BaseModel):
     candidate_id: int = 0
@@ -94,3 +97,12 @@ class RegisterCandidate(BaseModel):
     last_name: str
     age: int
     phone: int
+
+
+class ResumeResponse(BaseModel):
+    resume_description: ResumeBase
+    skills: list[ResumeSkillBase] = []
+    candidate: CandidateBase
+
+    class Config:
+        from_attributes = True

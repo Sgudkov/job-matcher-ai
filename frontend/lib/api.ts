@@ -3,13 +3,13 @@ import {Search} from "../app/types/types";
 const API_URL = "http://localhost:8000/api/v1";
 
 
-interface Token{
-  sub: number,
-  role: 'candidate' | 'employer',  // Роль пользователя из токена
-  email: string,  // Email пользователя из токена
-  access_token: string,
-  token_type: string,
-  expires_in: number
+interface Token {
+    sub: number,
+    role: 'candidate' | 'employer',  // Роль пользователя из токена
+    email: string,  // Email пользователя из токена
+    access_token: string,
+    token_type: string,
+    expires_in: number
 }
 
 
@@ -88,7 +88,7 @@ export async function fetchUser(token: string) {
     const data = await res.json();
 
     // Добавляем роль и email из токена в данные пользователя
-    return { ...data, role: tokenData.role, email: tokenData.email };
+    return {...data, role: tokenData.role, email: tokenData.email};
 }
 
 
@@ -101,15 +101,6 @@ function decodeToken(token: string): Token | null {
     }
 }
 
-export async function me() {
-    const token = localStorage.getItem("token");
-    if (!token) return null;
-
-    const res = await fetch(`${API_URL}/auth/me`, {
-        headers: {Authorization: `Bearer ${token}`},
-    });
-    return res.json();
-}
 
 export async function getSearchVacancy(searchParams: Search) {
     const res = await fetch(`${API_URL}/vacancies/search`, {
@@ -131,6 +122,25 @@ export async function getSearchResume(searchParams: Search) {
     return data;
 }
 
-export function logout() {
-    localStorage.removeItem("token");
+
+export async function getResume(id_: number) {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    const res = await fetch(`${API_URL}/resumes/${id_}`, {
+        // method: "GET",
+        headers: {Authorization: `Bearer ${token}`},
+    });
+
+    return await res.json();
+
+}
+
+export async function getVacancy(id_: number) {
+    const token = localStorage.getItem("token");
+    if (!token) return null;
+    const res = await fetch(`${API_URL}/vacancies/${id_}`, {
+        // method: "GET",
+        headers: {Authorization: `Bearer ${token}`},
+    });
+    return await res.json();
 }
