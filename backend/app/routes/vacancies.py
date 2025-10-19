@@ -145,11 +145,11 @@ async def search_vacancies(search: SearchRequest):
         raw_matches = await matcher.filter_search(
             search_request=search,
         )
-
+        return raw_matches
         # Агрегируем данные: объединяем soft + hard векторы в единый ответ
-        aggregated_results = matcher.aggregate_vacancy_matches(raw_matches)
-
-        return aggregated_results
+        # aggregated_results = matcher.aggregate_vacancy_matches(raw_matches)
+        #
+        # return aggregated_results
     except Exception as e:
         logger.error(f"Error searching vacancies: {e}", exc_info=True)
         raise HTTPException(

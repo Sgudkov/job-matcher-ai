@@ -5,11 +5,14 @@ import {useState, useEffect} from 'react';
 import {getSearchVacancy} from '../../lib/api';
 import {createSearch, FoundVacancy} from '../types/types';
 import {useRouter} from "next/navigation";
+import {number} from "prop-types";
 
 export default function VacanciesPage() {
     const [search, setSearch] = useState('');
     const [skillInputs, setSkillInputs] = useState({});
     const [summaryInputs, setSummaryInputs] = useState({});
+    const [salaryInputs, setSalaryInputs] = useState({});
+    const [experienceInputs, setExperienceInputs] = useState({});
     const [isSkillsExpanded, setIsSkillsExpanded] = useState(true);
     const [isSummaryExpanded, setIsSummaryExpanded] = useState(true);
     const [isSalaryExpanded, setIsSalaryExpanded] = useState(true);
@@ -32,23 +35,31 @@ export default function VacanciesPage() {
     const skillOption = ['Включить', 'Исключить'];
     const rangeOption = ['От', 'До'];
 
+    const fetchData = async () => {
+        const searchData = createSearch();
+        searchData.filters.skills.must_have = getSkillsArray(skillInputs['Включить']);
+        searchData.filters.skills.must_not_have = getSkillsArray(skillInputs['Исключить']);
+        const res = await getSearchVacancy(searchData);
+        setFilteredVacancies(res);
+    };
+
     // Получение вакансий при первом рендере
     useEffect(() => {
-        const fetchData = async () => {
-            const searchData = createSearch();
-            searchData.filters.skills.must_have = getSkillsArray(skillInputs['Включить']);
-            searchData.filters.skills.must_not_have = getSkillsArray(skillInputs['Исключить']);
-            const res = await getSearchVacancy(searchData);
-            setFilteredVacancies(res);
-        };
         fetchData();
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
+    // По фильтру идем искать вакансии
     const requestSearch = () => {
         const searchData = createSearch();
         searchData.filters.skills.must_have = getSkillsArray(skillInputs['Включить'] || '');
         searchData.filters.skills.must_not_have = getSkillsArray(skillInputs['Исключить'] || '');
+        searchData.filters.summary.must_have = getSkillsArray(summaryInputs['Включить'] || '');
+        searchData.filters.salary.min_salary = salaryInputs['От'] || 0;
+        searchData.filters.salary.max_salary = salaryInputs['До'] || 99999999;
+        searchData.filters.experience_vacancy.min_years = experienceInputs['От'] || 0;
+        searchData.filters.experience_vacancy.max_years = experienceInputs['До'] || 100;
+        console.log(searchData)
         getSearchVacancy(searchData).then((res) => {
             setFilteredVacancies(res);
             setCurrentPage(1);
@@ -59,7 +70,9 @@ export default function VacanciesPage() {
         router.push(`/cards/${vacancyId}?isVacancy=true`);
     };
 
-    const vacanciesToShow = filteredVacancies || [];
+    const vacanciesToShow = filteredVacancies
+        ? [...filteredVacancies].sort((a, b) => b.score - a.score)
+        : [];
 
     // Вычисляем вакансии для текущей страницы
     const indexOfLastVacancy = currentPage * vacanciesPerPage;
@@ -187,8 +200,8 @@ export default function VacanciesPage() {
                                             <input
                                                 type="text"
                                                 placeholder="Зароботная плата"
-                                                value={summaryInputs[type] || ''}
-                                                onChange={(e) => setSummaryInputs((prev) => ({
+                                                value={salaryInputs[type] || ''}
+                                                onChange={(e) => setSalaryInputs((prev) => ({
                                                     ...prev,
                                                     [type]: e.target.value
                                                 }))}
@@ -219,8 +232,8 @@ export default function VacanciesPage() {
                                             <input
                                                 type="text"
                                                 placeholder="Опыт"
-                                                value={summaryInputs[type] || ''}
-                                                onChange={(e) => setSummaryInputs((prev) => ({
+                                                value={experienceInputs[type] || ''}
+                                                onChange={(e) => setExperienceInputs((prev) => ({
                                                     ...prev,
                                                     [type]: e.target.value
                                                 }))}
@@ -235,7 +248,13 @@ export default function VacanciesPage() {
                     <div
                         className="flex flex-row gap-3 justify-center items-center fixed left-0 bottom-0 w-[425px] px-10 py-5 bg-white z-10 border-t border-gray-100 shadow-[0_-2px_12px_rgba(0,0,0,0.04)] rounded-b-[18px] lg:left-[calc((100vw-1600px)/2)] lg:rounded-[18px]">
                         <button
-                            onClick={() => setSkillInputs({})}
+                            onClick={() => {
+                                setSkillInputs({});
+                                setSummaryInputs({});
+                                setSalaryInputs({});
+                                setExperienceInputs({});
+                                fetchData();
+                            }}
                             className="bg-[#4f8cff] text-white border-none px-4 py-2 text-base cursor-pointer rounded-lg font-medium transition-colors hover:bg-[#2357d5]"
                         >
                             Сбросить фильтры

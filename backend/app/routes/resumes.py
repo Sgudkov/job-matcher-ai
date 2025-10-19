@@ -141,10 +141,12 @@ async def search_resumes(search: SearchRequest):
             search_request=search,
         )
 
-        # Агрегируем данные: объединяем soft + hard векторы в единый ответ
-        aggregated_results = matcher.aggregate_resume_matches(raw_matches)
+        return raw_matches
 
-        return aggregated_results
+        # Агрегируем данные: объединяем soft + hard векторы в единый ответ
+        # aggregated_results = matcher.aggregate_resume_matches(raw_matches)
+        #
+        # return aggregated_results
     except Exception as e:
         logger.error(f"Error searching resumes: {e}", exc_info=True)
         raise HTTPException(
