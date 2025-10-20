@@ -3,6 +3,7 @@
 import {useAuth} from "../context/AuthContext";
 import React from "react";
 import {VacancyDescriptionResponse} from "../types/types";
+import {useRouter} from "next/navigation";
 
 interface VacancyCardProps {
     vacancyData: VacancyDescriptionResponse | null;
@@ -10,6 +11,7 @@ interface VacancyCardProps {
 
 const VacancyCard: React.FC<VacancyCardProps> = ({vacancyData}) => {
     const {user, isLoading} = useAuth();
+    const router = useRouter();
 
     const renderUserInfo = () => (
         <>
@@ -78,19 +80,24 @@ const VacancyCard: React.FC<VacancyCardProps> = ({vacancyData}) => {
         );
     };
 
+    /* ----------  Кнопка «Назад»  ---------- */
+    const goBack = () => router.back();
+
     return (
         <div className="bg-white flex items-center justify-center p-4">
             <div
                 className="max-w-3xl w-full mt-10 bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl shadow-2xl border border-gray-700 text-white space-y-6">
-                <div className="border-b border-gray-700 pb-4">
-                    <h1 className="text-3xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                {/* Блок «Назад» */}
+                <div className="flex justify-between items-center mb-4">
+                    <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                         {vacancyData?.vacancy_description?.title}
                     </h1>
-                    <h3 className="text-3xl font-extrabold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                        Заработная
-                        плата: {vacancyData?.vacancy_description?.salary_from} - {vacancyData?.vacancy_description?.salary_to}
-                    </h3>
-
+                    <button
+                        onClick={goBack}
+                        className="text-sm font-medium text-blue-300 hover:text-blue-500"
+                    >
+                        ← Назад
+                    </button>
                 </div>
 
 

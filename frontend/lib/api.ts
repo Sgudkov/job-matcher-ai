@@ -63,6 +63,8 @@ export async function login(username: string, password: string) {
     const data = await res.json();
     if (data.access_token) {
         localStorage.setItem("token", data.access_token);
+        const cookieValue = encodeURIComponent(data.access_token);
+        document.cookie = `token=${cookieValue}; path=/; max-age=${60 * 60 * 24 * 7}`;
     }
     return data;
 }
@@ -143,4 +145,33 @@ export async function getVacancy(id_: number) {
         headers: {Authorization: `Bearer ${token}`},
     });
     return await res.json();
+}
+
+
+export async function validateToken(token?: string): Promise<boolean> {
+    // Если токен не передан – берём из localStorage
+    const authToken = token ?? localStorage.getItem('token');
+    if (!authToken) return false;
+
+    try {
+        const res = await fetch(`${API_URL}/auth/verify-token/`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${authToken}`,
+            },
+        });
+
+        // Если статус 200 – токен валиден
+        if (res.ok) {
+            // Можно дополнительно проверить тело ответа, если бекенд возвращает данные
+            return true;
+        }
+
+        // Любой другой статус – токен недействителен
+        return false;
+    } catch (err) {
+        console.error('Ошибка при проверке токена:', err);
+        return false;
+    }
 }

@@ -15,9 +15,10 @@ from backend.app.core.security import (
 from backend.app.config import settings
 from backend.app.db.domain.unit_of_work import UnitOfWork
 from backend.app.db.infrastructure.database import get_db
-from backend.app.models.auth import Token, User
+from backend.app.models.auth import Token, User, TokenData
 from backend.app.models.candidate import CandidateCreate, RegisterCandidate
 from backend.app.models.employer import EmployerCreate, RegisterEmployer
+from backend.app.services.dependencies import get_current_active_user
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -181,3 +182,11 @@ async def register_employer(data: RegisterEmployer, db: AsyncSession = Depends(g
     except Exception as e:
         logger.error(f"Error registering employer: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/verify-token")
+async def verify_token(current_user: TokenData = Depends(get_current_active_user)):
+    """Проверка валидности токена"""
+    return {
+        "message": "Token is valid",
+    }

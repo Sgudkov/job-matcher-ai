@@ -13,14 +13,39 @@ export default function VacanciesPage() {
     const [summaryInputs, setSummaryInputs] = useState({});
     const [salaryInputs, setSalaryInputs] = useState({});
     const [experienceInputs, setExperienceInputs] = useState({});
+
     const [isSkillsExpanded, setIsSkillsExpanded] = useState(true);
     const [isSummaryExpanded, setIsSummaryExpanded] = useState(true);
     const [isSalaryExpanded, setIsSalaryExpanded] = useState(true);
     const [isExperienceExpanded, setIsExperienceExpanded] = useState(true);
+
     const [filteredVacancies, setFilteredVacancies] = useState<FoundVacancy[] | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const vacanciesPerPage = 10;
     const router = useRouter();
+
+    // Сохраняем состояние filteredVacancies в localStorage при изменении
+    useEffect(() => {
+        const savedVacancy = localStorage.getItem('filteredVacancies');
+        if (savedVacancy) {
+            const parsed = JSON.parse(savedVacancy);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                setFilteredVacancies(parsed);
+                return;
+            }
+        }
+        fetchData();
+    }, []);
+
+
+    // Сохраняем состояние filteredResumes в localStorage при изменении
+    useEffect(() => {
+        // Сохраняем только если данные действительно есть
+        if (filteredVacancies && filteredVacancies.length > 0) {
+            localStorage.setItem('filteredVacancies', JSON.stringify(filteredVacancies));
+        }
+    }, [filteredVacancies]);
+
 
     // Преобразует строку в массив навыков (разделитель - запятая)
     const getSkillsArray = (skillsString: string) => {
@@ -43,11 +68,14 @@ export default function VacanciesPage() {
         setFilteredVacancies(res);
     };
 
-    // Получение вакансий при первом рендере
-    useEffect(() => {
-        fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    const clearSearch = () => {
+        setSkillInputs({})
+        setSummaryInputs({})
+        setSalaryInputs({})
+        setExperienceInputs({})
+        localStorage.removeItem('filteredVacancies');
+    };
+
 
     // По фильтру идем искать вакансии
     const requestSearch = () => {
@@ -55,6 +83,7 @@ export default function VacanciesPage() {
         searchData.filters.skills.must_have = getSkillsArray(skillInputs['Включить'] || '');
         searchData.filters.skills.must_not_have = getSkillsArray(skillInputs['Исключить'] || '');
         searchData.filters.summary.must_have = getSkillsArray(summaryInputs['Включить'] || '');
+        searchData.filters.summary.must_not_have = getSkillsArray(summaryInputs['Исключить'] || '');
         searchData.filters.salary.min_salary = salaryInputs['От'] || 0;
         searchData.filters.salary.max_salary = salaryInputs['До'] || 99999999;
         searchData.filters.experience_vacancy.min_years = experienceInputs['От'] || 0;
@@ -248,13 +277,7 @@ export default function VacanciesPage() {
                     <div
                         className="flex flex-row gap-3 justify-center items-center fixed left-0 bottom-0 w-[425px] px-10 py-5 bg-white z-10 border-t border-gray-100 shadow-[0_-2px_12px_rgba(0,0,0,0.04)] rounded-b-[18px] lg:left-[calc((100vw-1600px)/2)] lg:rounded-[18px]">
                         <button
-                            onClick={() => {
-                                setSkillInputs({});
-                                setSummaryInputs({});
-                                setSalaryInputs({});
-                                setExperienceInputs({});
-                                fetchData();
-                            }}
+                            onClick={() => clearSearch()}
                             className="bg-[#4f8cff] text-white border-none px-4 py-2 text-base cursor-pointer rounded-lg font-medium transition-colors hover:bg-[#2357d5]"
                         >
                             Сбросить фильтры

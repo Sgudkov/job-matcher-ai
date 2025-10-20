@@ -9,6 +9,7 @@ from qdrant_client.models import PointStruct
 class ResumeSkillBase(BaseModel):
     resume_id: int = 0
     skill_name: str = ""
+    experience_age: int = 0
     description: str = ""
 
     class Config:

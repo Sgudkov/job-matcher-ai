@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {validateToken} from "../../lib/api";
 
 //Типы
 export type UserRole = 'candidate' | 'employer';
@@ -35,16 +36,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     //При загрузке приложения проверяем есть ли токен в localStorage
     useEffect(() => {
+
         const token = localStorage.getItem('token');
-        if (token) {
-            //Обновляем данные пользователя
-            updateUser(token);
+
+        async function initAuth() {
+            if (token) {
+                const isValid = await validateToken(token);
+                if (isValid) {
+                    // Токен валиден – обновляем пользователя
+                    updateUser();
+                } else {
+                    // Токен недействителен – очищаем
+                    logout();
+                }
+            }
+            setIsLoading(false);
         }
-        const userData = localStorage.getItem('user');
-        if (userData) {
-            setUser(JSON.parse(userData));
-        }
-        setIsLoading(false);
+
+        initAuth();
+
     }, []);
 
     useEffect(() => {
@@ -71,14 +81,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
         setUser(null);
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        localStorage.removeItem('filteredVacancies');
     }
 
-    function updateUser(token: string) {
-        const userData = decodeToken(token);
-        if (!userData) return;
-
-        setUser(userData);
-
+    function updateUser() {
+        const userData = localStorage.getItem('user');
+        if (userData) {
+            setUser(JSON.parse(userData));
+        }
     }
 
     //Функци декодирования токена

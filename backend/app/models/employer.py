@@ -9,7 +9,9 @@ from qdrant_client.http.models import PointStruct
 class VacancySkill(BaseModel):
     vacancy_id: int = 0
     skill_name: str = ""
+    experience_age: int = 0
     description: str = ""
+    description_hidden: str = ""
 
     class Config:
         from_attributes = True

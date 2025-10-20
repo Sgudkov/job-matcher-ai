@@ -55,7 +55,7 @@ class MembersEmbeddingSystem:
                     vector={
                         MembersDataType.SOFT_SKILL.value: embedding_soft.tolist(),
                     },
-                    payload=payload.dict(),
+                    payload=payload.model_dump(),
                 )
             )
             skills = [x for x in candidate.skills if x.resume_id == resume.id]
@@ -70,6 +70,7 @@ class MembersEmbeddingSystem:
                     user_id=candidate.id,
                     resume_id=resume.id,
                     skill_name=skill.skill_name,
+                    experience_age=skill.experience_age,
                     description=skill.description,
                     skill_name_norm=skill.skill_name.lower().strip(),
                     description_norm=skill.description.lower().strip(),
@@ -81,7 +82,7 @@ class MembersEmbeddingSystem:
                         vector={
                             MembersDataType.HARD_SKILL.value: embedding_hard.tolist(),
                         },
-                        payload=payload.dict(),
+                        payload=payload.model_dump(),
                     )
                 )
 
@@ -108,6 +109,7 @@ class MembersEmbeddingSystem:
                 salary_to=vacancy.salary_to,
                 employment_type=vacancy.employment_type,
                 work_mode=vacancy.work_mode,
+                summary_norm=vacancy.summary.lower().strip(),
                 location_norm=vacancy.location.lower().strip(),
                 employment_type_norm=vacancy.employment_type.lower().strip(),
             )
@@ -118,7 +120,7 @@ class MembersEmbeddingSystem:
                     vector={
                         MembersDataType.SOFT_SKILL.value: embedding_soft.tolist(),
                     },
-                    payload=payload.dict(),
+                    payload=payload.model_dump(),
                 )
             )
             skills = [x for x in employer.skills if x.vacancy_id == vacancy.id]
@@ -133,7 +135,10 @@ class MembersEmbeddingSystem:
                     employer_id=employer.id,
                     vacancy_id=vacancy.id,
                     skill_name=skill.skill_name,
+                    experience_age=skill.experience_age,
                     description=skill.description,
+                    description_hidden=skill.description_hidden,
+                    description_hidden_norm=skill.description_hidden.lower().strip(),
                     skill_name_norm=skill.skill_name.lower().strip(),
                     description_norm=skill.description.lower().strip(),
                 )
@@ -144,7 +149,7 @@ class MembersEmbeddingSystem:
                         vector={
                             MembersDataType.HARD_SKILL.value: embedding_hard.tolist(),
                         },
-                        payload=payload.dict(),
+                        payload=payload.model_dump(),
                     )
                 )
 

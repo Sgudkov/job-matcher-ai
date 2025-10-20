@@ -76,6 +76,7 @@ class ResumeSkillORM(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     resume_id = Column(Integer, ForeignKey("resumes.id", ondelete="CASCADE"))
     skill_name = Column(String(50), nullable=False)
+    experience_age = Column(Integer, nullable=True)
     description = Column(Text, nullable=True)  # что делал с этим навыком
     resume = relationship("ResumeORM", back_populates="skills")
 
@@ -126,7 +127,10 @@ class VacancySkillORM(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     vacancy_id = Column(Integer, ForeignKey("vacancies.id", ondelete="CASCADE"))
     skill_name = Column(String(50), nullable=False)
-    description = Column(Text, nullable=True)  # уточнение, зачем нужен этот навык
+    experience_age = Column(Integer, nullable=True)
+    description = Column(Text, nullable=True)  # Будут отображены кандидатам
+    description_hidden = Column(Text, nullable=True)  # Будут использоваться для поиска
+    description_hidden_norm = Column(Text, nullable=True)  # Нормированные скрытые
     vacancy = relationship("VacancyORM", back_populates="skills")
 
 

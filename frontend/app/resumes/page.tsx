@@ -10,11 +10,13 @@ export default function ResumesPage() {
     const [summaryInputs, setSummaryInputs] = useState({});
     const [salaryInputs, setSalaryInputs] = useState({});
     const [experienceInputs, setExperienceInputs] = useState({});
+
     const [isSkillsExpanded, setIsSkillsExpanded] = useState(true);
     const [isSummaryExpanded, setIsSummaryExpanded] = useState(true);
     const [isSalaryExpanded, setIsSalaryExpanded] = useState(true);
     const [isExperienceExpanded, setIsExperienceExpanded] = useState(true);
     const [filteredResumes, setFilteredResumes] = useState<FoundResume[] | null>(null);
+
     const [currentPage, setCurrentPage] = useState(1);
     const resumesPerPage = 10;
 
@@ -22,6 +24,23 @@ export default function ResumesPage() {
     const toggleSummarySection = () => setIsSummaryExpanded(prev => !prev);
     const toggleSalarySection = () => setIsSalaryExpanded(prev => !prev);
     const toggleExperienceSection = () => setIsExperienceExpanded(prev => !prev);
+
+
+    // Сохраняем состояние filteredResumes в localStorage при изменении
+    useEffect(() => {
+        const savedResumes = localStorage.getItem('filteredResumes');
+        if (savedResumes) {
+            setFilteredResumes(JSON.parse(savedResumes));
+        } else {
+            fetchData()
+        }
+    }, []);
+
+    // Сохраняем состояние filteredResumes в localStorage при изменении
+    useEffect(() => {
+        localStorage.setItem('filteredResumes', JSON.stringify(filteredResumes));
+    }, [filteredResumes]);
+
 
     const handleSkillChange = (skillType: string, value: string) =>
         setSkillInputs(prevInputs => ({
@@ -72,11 +91,6 @@ export default function ResumesPage() {
         setFilteredResumes(res);
     };
 
-    // Получение резюме при первом рендере
-    useEffect(() => {
-        fetchData();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     // По фильтру идем искать резюме
     const requestSearch = () => {
@@ -94,6 +108,16 @@ export default function ResumesPage() {
             setCurrentPage(1);
         });
     };
+
+    // Очищаем всё и заново запрашиваем рандомные данные
+    const clearSearchInputs = () => {
+        setSkillInputs({});
+        setSummaryInputs({});
+        setSalaryInputs({});
+        setExperienceInputs({});
+        fetchData();
+    }
+
 
     const resumesToShow = filteredResumes || [];
 
@@ -260,17 +284,12 @@ export default function ResumesPage() {
                             )}
 
                         </div>
+
                     </div>
                     <div
                         className="flex flex-row gap-3 justify-center items-center fixed left-0 bottom-0 w-[425px] px-10 py-5 bg-white z-10 border-t border-gray-100 shadow-[0_-2px_12px_rgba(0,0,0,0.04)] rounded-b-[18px] lg:left-[calc((100vw-1600px)/2)] lg:rounded-[18px]">
                         <button
-                            onClick={() => {
-                                setSkillInputs({});
-                                setSummaryInputs({});
-                                setSalaryInputs({});
-                                setExperienceInputs({});
-                                fetchData();
-                            }}
+                            onClick={() => clearSearchInputs()}
                             className="bg-[#4f8cff] text-white border-none px-4 py-2 text-base cursor-pointer rounded-lg font-medium transition-colors hover:bg-[#2357d5]"
                         >
                             Сбросить фильтры

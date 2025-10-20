@@ -1,6 +1,11 @@
 from pydantic import BaseModel
 
 
+# ============================================================================
+# ВНУТРЕННИЕ МОДЕЛИ ДЛЯ РАБОТЫ С QDRANT - КАНДИДАТЫ
+# ============================================================================
+
+
 class CandidatePayloadBase(BaseModel):
     type: str = ""
     user_id: int = 0
@@ -30,6 +35,11 @@ class CandidatePayloadHard(CandidatePayloadBase):
     description_norm: str = ""
 
 
+# ============================================================================
+# ВНУТРЕННИЕ МОДЕЛИ ДЛЯ РАБОТЫ С QDRANT - РАБОТОДАТЕЛИ
+# ============================================================================
+
+
 class EmployerPayloadBase(BaseModel):
     type: str = ""
     employer_id: int = 0
@@ -45,7 +55,7 @@ class EmployerPayloadSoft(EmployerPayloadBase):
     salary_from: int = 0
     salary_to: int = 0
     employment_type: str = ""
-    description_norm: str = ""
+    summary_norm: str = ""
     location_norm: str = ""
     employment_type_norm: str = ""
     work_mode: str = ""
@@ -54,6 +64,8 @@ class EmployerPayloadSoft(EmployerPayloadBase):
 class EmployerPayloadHard(EmployerPayloadBase):
     skill_name: str = ""
     description: str = ""
+    description_hidden: str = ""
     experience_age: int = 0
     skill_name_norm: str = ""
     description_norm: str = ""
+    description_hidden_norm: str = ""
