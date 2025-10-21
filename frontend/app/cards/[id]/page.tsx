@@ -32,7 +32,6 @@ export default function Card({params}: { params: { id: string } }) {
                     setVacancyData(vacancy);
                 } else {
                     const resume = await getResume(Number(id));
-
                     setResumeData(resume);
                 }
             } catch (error) {
@@ -57,7 +56,20 @@ export default function Card({params}: { params: { id: string } }) {
     return (
         <div className="bg-white flex items-center justify-center p-4 ">
             <div className="w-full max-w-2xl">
-                {isVacancy ? <VacancyCard vacancyData={vacancyData} /> : <ResumeCard resumeData={resumeData} />}
+                {isVacancy === null ? (
+                    // Пока не определено, что показывать
+                    <p>Загрузка...</p>
+                ) : isVacancy ? (
+                    vacancyData ? (
+                        <VacancyCard vacancyData={vacancyData} />
+                    ) : (
+                        <p>Не удалось загрузить вакансию. Попробуйте обновить страницу.</p>
+                    )
+                ) : resumeData ? (
+                    <ResumeCard resumeData={resumeData} />
+                ) : (
+                    <p>Не удалось загрузить резюме. Попробуйте обновить страницу.</p>
+                )}
             </div>
         </div>
     );

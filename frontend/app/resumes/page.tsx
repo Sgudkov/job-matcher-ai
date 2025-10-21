@@ -3,6 +3,7 @@
 import {useState, useEffect} from 'react';
 import {getSearchResume} from '../../lib/api';
 import {createSearch, FoundResume} from '../types/types';
+import {useRouter} from "next/navigation";
 
 export default function ResumesPage() {
     const [search, setSearch] = useState('');
@@ -17,6 +18,7 @@ export default function ResumesPage() {
     const [isExperienceExpanded, setIsExperienceExpanded] = useState(true);
     const [filteredResumes, setFilteredResumes] = useState<FoundResume[] | null>(null);
 
+    const router = useRouter();
     const [currentPage, setCurrentPage] = useState(1);
     const resumesPerPage = 10;
 
@@ -30,10 +32,19 @@ export default function ResumesPage() {
     useEffect(() => {
         const savedResumes = localStorage.getItem('filteredResumes');
         if (savedResumes) {
-            setFilteredResumes(JSON.parse(savedResumes));
-        } else {
-            fetchData()
+            try {
+                const parsed = JSON.parse(savedResumes);
+                if (Array.isArray(parsed)) {
+                    // Даже если массив пустой, обновляем состояние
+                    setFilteredResumes(sortByScore(parsed));
+                    return;
+                }
+            } catch {
+                // Если JSON некорректен, просто игнорируем
+            }
         }
+        // Если нет сохранённых данных или они некорректны – загружаем новые
+        fetchData();
     }, []);
 
     // Сохраняем состояние filteredResumes в localStorage при изменении
@@ -76,19 +87,23 @@ export default function ResumesPage() {
     };
 
     const handleResumeClick = (resumeId: string) => {
-        window.location.href = `/cards/${resumeId}`;
+        router.push(`/cards/${resumeId}`);
     };
 
     const skillOption = ['Включить', 'Исключить'];
     const rangeOption = ['От', 'До'];
+
+    const sortByScore = (arr: FoundResume[]) => {
+        return [...arr].sort((a, b) => (b.score ?? 0) - (a.score ?? 0));
+    }
 
     const fetchData = async () => {
         const searchData = createSearch();
         searchData.filters.skills.must_have = getSkillsArray(skillInputs['Включить'] || '');
         searchData.filters.skills.must_not_have = getSkillsArray(skillInputs['Исключить'] || '');
         const res = await getSearchResume(searchData);
-        console.log(res)
-        setFilteredResumes(res);
+        console.log("Fetch", res)
+        setFilteredResumes(sortByScore(res));
     };
 
 
@@ -104,7 +119,8 @@ export default function ResumesPage() {
         searchData.filters.experience_resume.min_years = experienceInputs['От'] || 0;
         searchData.filters.experience_resume.max_years = experienceInputs['До'] || 100;
         getSearchResume(searchData).then((res) => {
-            setFilteredResumes(res);
+            console.log("requestSearch", res)
+            setFilteredResumes(sortByScore(res));
             setCurrentPage(1);
         });
     };
@@ -115,11 +131,12 @@ export default function ResumesPage() {
         setSummaryInputs({});
         setSalaryInputs({});
         setExperienceInputs({});
-        fetchData();
+        localStorage.removeItem('filteredResumes');
     }
 
 
-    const resumesToShow = filteredResumes || [];
+    const resumesToShow = filteredResumes ?? [];
+
 
     const indexOfLastResume = currentPage * resumesPerPage;
     const indexOfFirstResume = indexOfLastResume - resumesPerPage;

@@ -132,7 +132,8 @@ export async function getResume(id_: number) {
         // method: "GET",
         headers: {Authorization: `Bearer ${token}`},
     });
-
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`Error ${res.status}`);
     return await res.json();
 
 }
@@ -144,6 +145,8 @@ export async function getVacancy(id_: number) {
         // method: "GET",
         headers: {Authorization: `Bearer ${token}`},
     });
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`Error ${res.status}`);
     return await res.json();
 }
 

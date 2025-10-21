@@ -68,7 +68,7 @@ const VacancyCard: React.FC<VacancyCardProps> = ({vacancyData}) => {
                         {skills.map((skill, index) => (
                             <li key={index} className="mb-4 border-b border-gray-700 pb-2">
                                 <strong className="block mb-1">{skill.skill_name}</strong>
-                                {/*<p className="text-gray-300">{skill.description}</p>*/}
+                                <p className="text-gray-300">{skill.description}</p>
                             </li>
                         ))}
                     </ul>
@@ -88,16 +88,35 @@ const VacancyCard: React.FC<VacancyCardProps> = ({vacancyData}) => {
             <div
                 className="max-w-3xl w-full mt-10 bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl shadow-2xl border border-gray-700 text-white space-y-6">
                 {/* Блок «Назад» */}
-                <div className="flex justify-between items-center mb-4">
+                {/* Кнопка «Назад» */}
+                <div className="border-b border-gray-700 pb-4">
+                <button
+                    onClick={() => router.back()}
+                    className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors mb-4"
+                    aria-label="Назад"
+                >
+                    {/* SVG‑стрелка */}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                    <span>Назад</span>
+                </button>
+
+
                     <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                         {vacancyData?.vacancy_description?.title}
                     </h1>
-                    <button
-                        onClick={goBack}
-                        className="text-sm font-medium text-blue-300 hover:text-blue-500"
-                    >
-                        ← Назад
-                    </button>
+                    <br/>
+                    <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
+                        Зарплата {vacancyData?.vacancy_description?.salary_from} - {vacancyData?.vacancy_description?.salary_to}
+                    </h1>
+
                 </div>
 
 

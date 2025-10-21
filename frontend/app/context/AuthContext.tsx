@@ -83,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
         document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         localStorage.removeItem('filteredVacancies');
+        localStorage.removeItem('filteredResumes');
     }
 
     function updateUser() {

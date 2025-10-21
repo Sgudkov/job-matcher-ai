@@ -5,7 +5,6 @@ import {useState, useEffect} from 'react';
 import {getSearchVacancy} from '../../lib/api';
 import {createSearch, FoundVacancy} from '../types/types';
 import {useRouter} from "next/navigation";
-import {number} from "prop-types";
 
 export default function VacanciesPage() {
     const [search, setSearch] = useState('');
