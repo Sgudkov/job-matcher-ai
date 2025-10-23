@@ -108,3 +108,18 @@ class VacancyResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class VacanciesList(BaseModel):
+    vacancy_base: VacancyBase
+    skills: list[VacancySkill] = []
+
+    class Config:
+        from_attributes = True
+
+
+class VacanciesResponseList(BaseModel):
+    vacancies: list[VacanciesList] = []
+
+    class Config:
+        from_attributes = True

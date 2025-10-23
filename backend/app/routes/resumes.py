@@ -12,6 +12,8 @@ from backend.app.models.candidate import (
     ResumeResponse,
     ResumeBase,
     CandidateBase,
+    ResumesResponseList,
+    ResumesList,
 )
 from backend.app.models.filter import SearchRequest
 
@@ -87,6 +89,42 @@ async def get_resumes(
             resume_description=resume, skills=skills, candidate=candidate
         )
         return response
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting resume: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error getting resume: {str(e)}")
+
+
+@router.get("/my/", response_model=ResumesResponseList)
+async def get_my_resumes(
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(get_current_active_user),
+):
+    """Получить все резюме кандидата"""
+    try:
+        if not current_user.user_id:
+            raise HTTPException(
+                status_code=401, detail="Invalid token: user_id missing"
+            )
+
+        uow = UnitOfWork(db)
+        resumes = await uow.resumes.get_resumes_skills(current_user.user_id)
+        result: ResumesResponseList = ResumesResponseList()
+
+        for res in resumes:
+            res_dict = res.__dict__
+            resume_list: ResumesList = ResumesList(
+                resumes_base=ResumeBase.model_validate(res_dict),
+                skills=[
+                    ResumeSkillBase.model_validate(x.__dict__)
+                    for x in res_dict.get("skills", [])
+                ],
+            )
+
+            result.resumes.append(resume_list)
+
+        return result
     except HTTPException:
         raise
     except Exception as e:

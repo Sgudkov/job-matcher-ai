@@ -107,3 +107,18 @@ class ResumeResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ResumesList(BaseModel):
+    resumes_base: ResumeBase
+    skills: list[ResumeSkillBase] = []
+
+    class Config:
+        from_attributes = True
+
+
+class ResumesResponseList(BaseModel):
+    resumes: list[ResumesList] = []
+
+    class Config:
+        from_attributes = True

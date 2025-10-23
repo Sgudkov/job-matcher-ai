@@ -12,6 +12,8 @@ from backend.app.models.employer import (
     VacancyBase,
     EmployerBase,
     VacancyResponse,
+    VacanciesResponseList,
+    VacanciesList,
 )
 from backend.app.models.filter import SearchRequest
 from backend.app.models.match import EmployerMatch
@@ -92,6 +94,42 @@ async def get_vacancy(
         )
 
         return response
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting vacancy: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Error getting vacancy: {str(e)}")
+
+
+@router.get("/my/", response_model=VacanciesResponseList)
+async def get_my_vacancies(
+    db: AsyncSession = Depends(get_db),
+    current_user: TokenData = Depends(get_current_active_user),
+):
+    """Получить все резюме кандидата"""
+    try:
+        if not current_user.user_id:
+            raise HTTPException(
+                status_code=401, detail="Invalid token: user_id missing"
+            )
+
+        uow = UnitOfWork(db)
+        vacancies = await uow.vacancies.get_vacancies_skills(current_user.user_id)
+        result: VacanciesResponseList = VacanciesResponseList()
+
+        for vac in vacancies:
+            vac_dict = vac.__dict__
+            vacancy_list: VacanciesList = VacanciesList(
+                vacancy_base=VacancyBase.model_validate(vac_dict),
+                skills=[
+                    VacancySkill.model_validate(x.__dict__)
+                    for x in vac_dict.get("skills", [])
+                ],
+            )
+
+            result.vacancies.append(vacancy_list)
+
+        return result
     except HTTPException:
         raise
     except Exception as e:

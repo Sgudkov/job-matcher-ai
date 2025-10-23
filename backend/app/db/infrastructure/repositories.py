@@ -1,4 +1,5 @@
 from sqlalchemy import delete, select
+from sqlalchemy.orm import selectinload
 
 from backend.app.db.domain.repositories import BaseRepository
 from backend.app.db.infrastructure.orm import (
@@ -35,6 +36,19 @@ class ResumeRepository(BaseRepository[ResumeORM]):
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
+    async def get_resumes_skills(self, user_id: int):
+        stmt = (
+            select(ResumeORM)  # Выбираем только ResumeORM
+            .join(CandidateORM)
+            .where(CandidateORM.user_id == user_id)
+            # Загружаем связанные ResumeSkillORM с помощью selectinload
+            .options(selectinload(ResumeORM.skills))
+        )
+        result = await self.session.execute(stmt)
+        # result.scalars().all() вернет список объектов ResumeORM,
+        # каждый из которых будет содержать свои связанные объекты ResumeSkillORM
+        return result.unique().scalars().all()
+
 
 class ResumeSkillRepository(BaseRepository[ResumeSkillORM]):
     orm_model = ResumeSkillORM
@@ -66,6 +80,16 @@ class VacancyRepository(BaseRepository[VacancyORM]):
         stmt = select(VacancyORM).where(VacancyORM.employer_id == employer_id)
         result = await self.session.execute(stmt)
         return result.scalars().all()
+
+    async def get_vacancies_skills(self, user_id: int):
+        stmt = (
+            select(VacancyORM)
+            .join(EmployerORM)
+            .where(EmployerORM.user_id == user_id)
+            .options(selectinload(VacancyORM.skills))
+        )
+        result = await self.session.execute(stmt)
+        return result.unique().scalars().all()
 
 
 class VacancySkillRepository(BaseRepository[VacancySkillORM]):

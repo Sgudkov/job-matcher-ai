@@ -142,8 +142,17 @@ class QdrantFilterBuilder:
         # 2 Soft skills фильтры
 
         # Summary
-        # if filters.summary:
-
+        if filters.summary:
+            if filters.summary.must_have:
+                soft_skills_should.extend(
+                    [
+                        models.FieldCondition(
+                            key="summary_norm",
+                            match=models.MatchText(text=skill.lower().strip()),
+                        )
+                        for skill in filters.summary.must_have
+                    ]
+                )
         # if filters.summary.must_not_have:
         #     soft_skills_must_not.extend(
         #         [

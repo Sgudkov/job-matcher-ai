@@ -1,6 +1,6 @@
 import {NextResponse} from 'next/server';
 import type {NextRequest} from 'next/server';
-import {validateToken} from "./lib/api";
+import {validateToken} from "@/src/lib/api";
 
 
 /**
