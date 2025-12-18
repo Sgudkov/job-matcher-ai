@@ -18,18 +18,36 @@ class Base(DeclarativeBase):
     pass
 
 
+class UserORM(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String(50), nullable=False, unique=True)
+    password = Column(String(100), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+
+    # Полиморфные связи
+    candidate = relationship("CandidateORM", back_populates="user", uselist=False)
+    employer = relationship("EmployerORM", back_populates="user", uselist=False)
+
+
 class CandidateORM(Base):
     __tablename__ = "candidates"
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=True
+    )
     first_name = Column(String(50), nullable=True)
     last_name = Column(String(50), nullable=True)
     age = Column(Integer, nullable=True)
-    email = Column(String(50), nullable=True)
+    # email = Column(String(50), nullable=True)
     phone = Column(Numeric(20), nullable=True)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
     # Связь: у кандидата может быть несколько резюме
+    user = relationship("UserORM", back_populates="candidate")
     resumes = relationship("ResumeORM", back_populates="candidate")
 
 
@@ -58,6 +76,7 @@ class ResumeSkillORM(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     resume_id = Column(Integer, ForeignKey("resumes.id", ondelete="CASCADE"))
     skill_name = Column(String(50), nullable=False)
+    experience_age = Column(Integer, nullable=True)
     description = Column(Text, nullable=True)  # что делал с этим навыком
     resume = relationship("ResumeORM", back_populates="skills")
 
@@ -66,15 +85,19 @@ class EmployerORM(Base):
     __tablename__ = "employers"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(
+        Integer, ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=True
+    )
     first_name = Column(String(50), nullable=True)
     last_name = Column(String(50), nullable=True)
     company_name = Column(String(100), nullable=True)
-    email = Column(String(50), nullable=True)
+    # email = Column(String(50), nullable=True)
     phone = Column(Numeric(20), nullable=True)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
 
     # Связь: у работодателя может быть несколько вакансий
+    user = relationship("UserORM", back_populates="employer")
     vacancies = relationship("VacancyORM", back_populates="employer")
 
 
@@ -104,7 +127,10 @@ class VacancySkillORM(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     vacancy_id = Column(Integer, ForeignKey("vacancies.id", ondelete="CASCADE"))
     skill_name = Column(String(50), nullable=False)
-    description = Column(Text, nullable=True)  # уточнение, зачем нужен этот навык
+    experience_age = Column(Integer, nullable=True)
+    description = Column(Text, nullable=True)  # Будут отображены кандидатам
+    description_hidden = Column(Text, nullable=True)  # Будут использоваться для поиска
+    description_hidden_norm = Column(Text, nullable=True)  # Нормированные скрытые
     vacancy = relationship("VacancyORM", back_populates="skills")
 
 

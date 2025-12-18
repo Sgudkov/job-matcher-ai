@@ -1,6 +1,6 @@
 from dataclasses import field
 from datetime import datetime
-from typing import List
+from typing import List, Literal
 
 from pydantic import BaseModel
 from qdrant_client.models import PointStruct
@@ -9,7 +9,11 @@ from qdrant_client.models import PointStruct
 class ResumeSkillBase(BaseModel):
     resume_id: int = 0
     skill_name: str = ""
+    experience_age: int = 0
     description: str = ""
+
+    class Config:
+        from_attributes = True
 
 
 class ResumeData(BaseModel):
@@ -33,8 +37,9 @@ class CandidateBase(BaseModel):
     first_name: str
     last_name: str
     age: int
-    email: str
+    # email: str
     phone: int
+    user_id: int | None = None
 
     class Config:
         from_attributes = True
@@ -50,10 +55,11 @@ class CandidateEmbedding(BaseModel):
 
 
 class CandidateCreate(BaseModel):
+    user_id: int | None = None
     first_name: str
     last_name: str
     age: int
-    email: str
+    # email: str
     phone: int
 
 
@@ -72,3 +78,47 @@ class ResumeCreate(ResumeData):
 
 class ResumeUpsert(ResumeBase):
     pass
+
+
+class CandidateResponse(CandidateBase):
+    """Модель ответа для эндпоинта get_candidate"""
+
+    role: Literal["candidate"] = "candidate"
+
+    class Config:
+        from_attributes = True
+
+
+class RegisterCandidate(BaseModel):
+    """Модель для регистрации кандидата"""
+
+    email: str
+    password: str
+    first_name: str
+    last_name: str
+    age: int
+    phone: int
+
+
+class ResumeResponse(BaseModel):
+    resume_description: ResumeBase
+    skills: list[ResumeSkillBase] = []
+    candidate: CandidateBase
+
+    class Config:
+        from_attributes = True
+
+
+class ResumesList(BaseModel):
+    resumes_base: ResumeBase
+    skills: list[ResumeSkillBase] = []
+
+    class Config:
+        from_attributes = True
+
+
+class ResumesResponseList(BaseModel):
+    resumes: list[ResumesList] = []
+
+    class Config:
+        from_attributes = True

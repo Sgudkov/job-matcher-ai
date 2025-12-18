@@ -21,7 +21,18 @@ dependencies = [
     "asyncpg (>=0.30.0,<0.31.0)",
     "alembic (>=1.16.5,<2.0.0)",
     "psycopg2-binary (>=2.9.10,<3.0.0)",
-    "pre-commit (>=4.3.0,<5.0.0)"
+    "pre-commit (>=4.3.0,<5.0.0)",
+    "python-multipart (>=0.0.20,<0.0.21)",
+    "passlib[bcrypt] (>=1.7.4,<2.0.0)",
+    "python-jose[cryptography] (>=3.3.0,<4.0.0)",
+    "pyjwt (>=2.10.1,<3.0.0)",
+    "bcrypt (<=4.3.0)",
+    "pytest (>=8.4.2,<9.0.0)",
+    "pytest-cov (>=7.0.0,<8.0.0)",
+    "pytest-asyncio (>=1.2.0,<2.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "aiosqlite (>=0.21.0,<0.22.0)",
+    "rapidfuzz (>=3.14.1,<4.0.0)",
 ]
 
 
@@ -40,6 +51,7 @@ module = [
     "services.*",
     "config.*",
     "repositories.*",
+    "frontend/*",
 ]
 
 plugins = [
@@ -55,4 +67,5 @@ poetry-plugin-export = ">=1.8"
 alembic = "^1.16.5"
 
 [tool.pytest.ini_options]
-pythonpath = ["backend"]
+pythonpath = ["."]
+asyncio_mode = "auto"

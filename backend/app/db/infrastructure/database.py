@@ -43,6 +43,7 @@ AsyncSessionLocal = async_sessionmaker(
 
 # Dependency для получения сессии
 async def get_db():
+    """Получение сессии БД"""
     async with AsyncSessionLocal() as session:
         yield session
 
@@ -52,6 +53,7 @@ class QdrantAPI:
         self.client = QdrantClient(url=QDRANT_URL)
 
     def create_collection(self, collection_name: str) -> bool:
+        """Создание коллекции"""
         return self.client.create_collection(
             collection_name=collection_name,
             vectors_config={
@@ -65,6 +67,7 @@ class QdrantAPI:
         )
 
     def add_vectors(self, collection_name: str, vectors: list[PointStruct]):
+        """Добавить вектор в БД"""
         self.client.upsert(
             collection_name=collection_name,
             wait=True,
@@ -78,6 +81,7 @@ class QdrantAPI:
         limit: int,
         **kwargs,
     ):
+        """Поиск вектора в БД"""
         must = []
         args = kwargs.get("kwargs", {})
         for key, value in args.items():
@@ -95,6 +99,7 @@ class QdrantAPI:
     def scroll(
         self, collection_name: str, limit: int, **kwargs
     ) -> tuple[list[Record], int | str | None | Any]:
+        """Скролл по коллекции"""
         must: list = []
         for key, value in kwargs.items():
             must.append(
@@ -112,11 +117,13 @@ class QdrantAPI:
     def retrieve(
         self, collection_name: str, member_uuid: list[int | str]
     ) -> list[Record]:
+        """Получить записи по uuid"""
         return self.client.retrieve(
             collection_name=collection_name, ids=member_uuid, with_vectors=True
         )
 
     async def remove_employer_skills(self, employer_id: int, vacancy_id: int):
+        """Удаление навыков работодателя"""
         keys = {
             "type": MembersDataType.SOFT_SKILL.value,
             "employer_id": employer_id,
@@ -133,6 +140,7 @@ class QdrantAPI:
         )
 
     async def remove_candidate_skills(self, candidate_id: int, resume_id: int):
+        """Удаление навыков кандидата"""
         keys = {
             "type": MembersDataType.SOFT_SKILL.value,
             "user_id": candidate_id,
@@ -149,6 +157,7 @@ class QdrantAPI:
         )
 
     def _remove_points(self, collection_name: str, **kwargs):
+        """Удаление записей по условию"""
         must = []
         args = kwargs.get("kwargs", {})
         for key, value in args.items():

@@ -1,5 +1,6 @@
 from dataclasses import field
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel
 from qdrant_client.http.models import PointStruct
@@ -8,7 +9,12 @@ from qdrant_client.http.models import PointStruct
 class VacancySkill(BaseModel):
     vacancy_id: int = 0
     skill_name: str = ""
+    experience_age: int = 0
     description: str = ""
+    description_hidden: str = ""
+
+    class Config:
+        from_attributes = True
 
 
 class VacancyData(BaseModel):
@@ -32,7 +38,7 @@ class EmployerBase(BaseModel):
     id: int = 0
     first_name: str
     last_name: str
-    email: str
+    # email: str
     phone: int
 
     class Config:
@@ -44,10 +50,11 @@ class EmployerEmbedding(BaseModel):
 
 
 class EmployerCreate(BaseModel):
+    user_id: int | None = None
     first_name: str
     last_name: str
     company_name: str
-    email: str
+    # email: str
     phone: int
 
 
@@ -71,3 +78,48 @@ class VacancyCreate(VacancyData):
 class EmployerVector(EmployerBase):
     vacancies: list[VacancyBase] = field(default_factory=list)
     skills: list[VacancySkill] = field(default_factory=list)
+
+
+class EmployerResponse(EmployerBase):
+    """Модель ответа для эндпоинта get_employer"""
+
+    company_name: str
+    role: Literal["company"] = "company"
+
+    class Config:
+        from_attributes = True
+
+
+class RegisterEmployer(BaseModel):
+    """Модель для регистрации работодателя"""
+
+    email: str
+    password: str
+    first_name: str
+    last_name: str
+    company_name: str
+    phone: int
+
+
+class VacancyResponse(BaseModel):
+    vacancy_description: VacancyBase
+    skills: list[VacancySkill] = []
+    employer: EmployerBase
+
+    class Config:
+        from_attributes = True
+
+
+class VacanciesList(BaseModel):
+    vacancy_base: VacancyBase
+    skills: list[VacancySkill] = []
+
+    class Config:
+        from_attributes = True
+
+
+class VacanciesResponseList(BaseModel):
+    vacancies: list[VacanciesList] = []
+
+    class Config:
+        from_attributes = True
