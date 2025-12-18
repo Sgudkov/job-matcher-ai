@@ -13,16 +13,19 @@ class BaseRepository(Generic[T]):
         self.session = session
 
     async def add(self, obj) -> T:
+        """Добавить запись в БД"""
         orm_obj = self.orm_model(**obj.dict())  # type: ignore[misc]
         self.session.add(orm_obj)
         return orm_obj
 
     async def get(self, id_: int) -> T | None:
+        """Получить запись из БД"""
         stmt = select(self.orm_model).where(self.orm_model.id == id_)  # type: ignore[union-attr]
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
     async def update(self, id_: int, obj) -> T | None:
+        """Обновить записи в БД"""
         stmt = select(self.orm_model).where(self.orm_model.id == id_)  # type: ignore[union-attr]
         result = await self.session.execute(stmt)
         orm_obj = result.scalar_one_or_none()
@@ -32,16 +35,19 @@ class BaseRepository(Generic[T]):
         return orm_obj
 
     async def remove(self, id_: int) -> bool:
+        """Удалить запись из БД"""
         stmt = delete(self.orm_model).where(self.orm_model.id == id_)  # type: ignore[union-attr]
         result = await self.session.execute(stmt)
         return result.rowcount > 0
 
     async def get_list(self, id_: int):
+        """Получить список по id"""
         stmt = select(self.orm_model).where(self.orm_model.id == id_)  # type: ignore[union-attr]
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
     async def get_all(self):
+        """Выбрать все записи"""
         stmt = select(self.orm_model)
         result = await self.session.execute(stmt)
         return result.scalars().all()

@@ -17,6 +17,7 @@ recalc_router = APIRouter(prefix="/recalc", tags=["recalc"])
 
 @router.get("/resumes/{resume_id}")
 async def get_resume_matches(resume_id: int, db: AsyncSession = Depends(get_db)):
+    """Получить матс резюме"""
     try:
         uow = UnitOfWork(db)
         async with uow.transaction():
@@ -29,6 +30,7 @@ async def get_resume_matches(resume_id: int, db: AsyncSession = Depends(get_db))
 
 @router.get("/vacancies/{vacancy_id}")
 async def get_vacancy_matches(vacancy_id: int, db: AsyncSession = Depends(get_db)):
+    """Получить матчи для вакансии"""
     try:
         uow = UnitOfWork(db)
         async with uow.transaction():
