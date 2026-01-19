@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Кастомные цвета для проекта */
+:root {
+  --color-primary: #4f8cff;
+  --color-primary-dark: #2357d5;
+  --color-primary-hover: #0056b3;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #f9fafb;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
