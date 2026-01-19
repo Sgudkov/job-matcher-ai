@@ -14,9 +14,10 @@ from qdrant_client.http.models import (
     Filter,
 )
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from torch import Tensor
+from sympy.tensor.tensor import Tensor
 
-from backend.app.config import MembersDataType, QdrantCollection
+
+from app.config import MembersDataType, QdrantCollection
 
 load_dotenv()
 logging.basicConfig(level=logging.INFO)
@@ -50,7 +51,13 @@ async def get_db():
 
 class QdrantAPI:
     def __init__(self):
-        self.client = QdrantClient(url=QDRANT_URL)
+        try:
+            self.client = QdrantClient(url=QDRANT_URL)
+
+            logger.info("Подключение к Qdrant успешно")
+        except Exception as e:
+            logger.error(f"Ошибка подключения к Qdrant: {e}")
+            raise ValueError(e)
 
     def create_collection(self, collection_name: str) -> bool:
         """Создание коллекции"""

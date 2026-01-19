@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from backend.app.models.embeddings import (
+from app.models.embeddings import (
     CandidatePayloadSoft,
     CandidatePayloadHard,
     EmployerPayloadSoft,

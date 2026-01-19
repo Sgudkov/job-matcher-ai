@@ -3,7 +3,7 @@ from typing import Tuple
 from numpy import ndarray
 from qdrant_client.http.models import Filter, models
 
-from backend.app.models.filter import SearchRequest, SearchFilters
+from app.models.filter import SearchRequest, SearchFilters
 
 
 class QdrantFilterBuilder:

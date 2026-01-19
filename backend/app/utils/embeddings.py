@@ -4,18 +4,18 @@ from numpy import ndarray
 from qdrant_client.models import PointStruct
 from sentence_transformers import SentenceTransformer
 
-from backend.app import config
-from backend.app.config import MembersDataType
+from app import config
+from app.config import MembersDataType
 import numpy as np
 
-from backend.app.models.candidate import CandidateVector
-from backend.app.models.embeddings import (
+from app.models.candidate import CandidateVector
+from app.models.embeddings import (
     CandidatePayloadSoft,
     CandidatePayloadHard,
     EmployerPayloadSoft,
     EmployerPayloadHard,
 )
-from backend.app.models.employer import EmployerVector
+from app.models.employer import EmployerVector
 
 
 class MembersEmbeddingSystem:

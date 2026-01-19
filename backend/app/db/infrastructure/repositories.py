@@ -1,8 +1,8 @@
 from sqlalchemy import delete, select
 from sqlalchemy.orm import selectinload
 
-from backend.app.db.domain.repositories import BaseRepository
-from backend.app.db.infrastructure.orm import (
+from app.db.domain.repositories import BaseRepository
+from app.db.infrastructure.orm import (
     ResumeORM,
     ResumeSkillORM,
     EmployerORM,

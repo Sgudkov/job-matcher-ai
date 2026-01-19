@@ -1,9 +1,9 @@
 # Векторизация
 from fastapi import APIRouter
 
-from backend.app.models.candidate import CandidateEmbedding, CandidateVector
-from backend.app.models.employer import EmployerEmbedding, EmployerVector
-from backend.app.utils.embeddings import members_embedding_system
+from app.models.candidate import CandidateEmbedding, CandidateVector
+from app.models.employer import EmployerEmbedding, EmployerVector
+from app.utils.embeddings import members_embedding_system
 
 router = APIRouter(tags=["candidate_vectorization", "employer_vectorization"])
 

@@ -5,10 +5,10 @@ from typing import TypeVar, Type
 from qdrant_client.http.models import Filter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.config import QdrantCollection, MembersDataType
-from backend.app.db.domain.unit_of_work import UnitOfWork
-from backend.app.db.infrastructure.database import QdrantAPI
-from backend.app.models.match import (
+from app.config import QdrantCollection, MembersDataType
+from app.db.domain.unit_of_work import UnitOfWork
+from app.db.infrastructure.database import QdrantAPI
+from app.models.match import (
     MatchCreate,
     CandidateMatch,
     EmployerMatch,

@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.db.infrastructure.repositories import (
+from app.db.infrastructure.repositories import (
     CandidateRepository,
     ResumeRepository,
     ResumeSkillRepository,

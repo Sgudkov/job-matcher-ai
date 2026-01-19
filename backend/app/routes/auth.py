@@ -7,18 +7,18 @@ from datetime import timedelta
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.security import (
+from app.core.security import (
     create_access_token,
     verify_password,
     get_password_hash,
 )
-from backend.app.config import settings
-from backend.app.db.domain.unit_of_work import UnitOfWork
-from backend.app.db.infrastructure.database import get_db
-from backend.app.models.auth import Token, User, TokenData
-from backend.app.models.candidate import CandidateCreate, RegisterCandidate
-from backend.app.models.employer import EmployerCreate, RegisterEmployer
-from backend.app.services.dependencies import get_current_active_user
+from app.config import settings
+from app.db.domain.unit_of_work import UnitOfWork
+from app.db.infrastructure.database import get_db
+from app.models.auth import Token, User, TokenData
+from app.models.candidate import CandidateCreate, RegisterCandidate
+from app.models.employer import EmployerCreate, RegisterEmployer
+from app.services.dependencies import get_current_active_user
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 

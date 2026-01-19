@@ -4,8 +4,8 @@ from typing import List, TypeVar, Type
 from qdrant_client.http.models import ScoredPoint, Filter
 from rapidfuzz import fuzz
 
-from backend.app.config import MembersDataType
-from backend.app.models.match import (
+from app.config import MembersDataType
+from app.models.match import (
     EmployerMatch,
     CandidateMatch,
     SkillMatch,

@@ -4,9 +4,9 @@ import logging
 from fastapi import Depends, HTTPException, APIRouter
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.db.domain.unit_of_work import UnitOfWork
-from backend.app.db.infrastructure.database import get_db, QdrantAPI
-from backend.app.services.matching import MatchingService
+from app.db.domain.unit_of_work import UnitOfWork
+from app.db.infrastructure.database import get_db, QdrantAPI
+from app.services.matching import MatchingService
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

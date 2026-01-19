@@ -2,18 +2,18 @@ from typing import TypeVar, Type
 
 from numpy import ndarray
 from qdrant_client.http.models import Filter, models
-from backend.app import config
-from backend.app.config import MembersDataType
-from backend.app.db.infrastructure.database import QdrantAPI
-from backend.app.models.filter import SearchRequest
-from backend.app.models.match import (
+from app import config
+from app.config import MembersDataType
+from app.db.infrastructure.database import QdrantAPI
+from app.models.filter import SearchRequest
+from app.models.match import (
     EmployerMatch,
     CandidateMatch,
 )
-from backend.app.utils.embeddings import MembersEmbeddingSystem
-from backend.app.utils.filter.collection_resolver import CollectionResolver
-from backend.app.utils.filter.filter_builder import QdrantFilterBuilder
-from backend.app.utils.filter.score import FilterScore
+from app.utils.embeddings import MembersEmbeddingSystem
+from app.utils.filter.collection_resolver import CollectionResolver
+from app.utils.filter.filter_builder import QdrantFilterBuilder
+from app.utils.filter.score import FilterScore
 
 T = TypeVar("T", EmployerMatch, CandidateMatch)
 

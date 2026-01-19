@@ -3,10 +3,10 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.db.domain.unit_of_work import UnitOfWork
-from backend.app.db.infrastructure.database import get_db, QdrantAPI, qdrant_api
-from backend.app.models.auth import TokenData
-from backend.app.models.candidate import (
+from app.db.domain.unit_of_work import UnitOfWork
+from app.db.infrastructure.database import get_db, QdrantAPI, qdrant_api
+from app.models.auth import TokenData
+from app.models.candidate import (
     ResumeUpsert,
     ResumeSkillBase,
     ResumeResponse,
@@ -15,12 +15,12 @@ from backend.app.models.candidate import (
     ResumesResponseList,
     ResumesList,
 )
-from backend.app.models.filter import SearchRequest
+from app.models.filter import SearchRequest
 
-from backend.app.models.match import CandidateMatch
-from backend.app.services.dependencies import get_current_active_user
-from backend.app.services.fiter import SearchFilter
-from backend.app.services.storage import upsert_resume
+from app.models.match import CandidateMatch
+from app.services.dependencies import get_current_active_user
+from app.services.fiter import SearchFilter
+from app.services.storage import upsert_resume
 
 router = APIRouter(prefix="/resumes", tags=["resumes"])
 

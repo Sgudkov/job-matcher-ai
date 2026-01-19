@@ -34,3 +34,6 @@ pnpm-debug.log*
 .env.test.local
 .env.production.local
 /.coverage
+/backend/.poetry/
+/backend/app/dummy/
+/backend/whl/torch-2.4.1+cpu-cp312-cp312-linux_x86_64.whl

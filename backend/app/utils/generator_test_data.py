@@ -11,8 +11,8 @@ from typing import Dict, Any, List
 
 from qdrant_client.http.models import models
 
-from backend.app.config import QdrantCollection, MembersDataType
-from backend.app.db.infrastructure.database import qdrant_api
+from app.config import QdrantCollection, MembersDataType
+from app.db.infrastructure.database import qdrant_api
 
 
 async def call_api_httpx(
@@ -114,7 +114,7 @@ async def register_candidates(
     :return: кортеж (словарь {email: candidate_id}, словарь {email: token})
     """
     print("Загрузка кандидатов...")
-    candidates_data = load_json_file("candidates.json")
+    candidates_data = load_json_file("../dummy/candidates.json")
     candidate_ids = {}
     candidate_tokens = {}
 
@@ -166,7 +166,7 @@ async def register_employers(
     :return: кортеж (словарь {email: employer_id}, словарь {email: token})
     """
     print("\nЗагрузка работодателей...")
-    employers_data = load_json_file("employers.json")
+    employers_data = load_json_file("../dummy/employers.json")
     employer_ids = {}
     employer_tokens = {}
 
@@ -223,8 +223,8 @@ async def create_resumes(
     :param candidate_tokens: словарь {email: token} из регистрации
     """
     print("\nЗагрузка резюме...")
-    resumes_data = load_json_file("resumes.json")
-    candidates_list = load_json_file("candidates.json")
+    resumes_data = load_json_file("../dummy/resumes.json")
+    candidates_list = load_json_file("../dummy/candidates.json")
 
     if not candidate_ids:
         print("[WARNING] Список candidate_ids пуст, используются ID из JSON")
@@ -297,8 +297,8 @@ async def create_vacancies(
     :param employer_tokens: словарь {email: token} из регистрации
     """
     print("\nЗагрузка вакансий...")
-    vacancies_data = load_json_file("vacancies.json")
-    employers_list = load_json_file("employers.json")
+    vacancies_data = load_json_file("../dummy/vacancies.json")
+    employers_list = load_json_file("../dummy/employers.json")
 
     if not employer_ids:
         print("[WARNING] Список employer_ids пуст, используются ID из JSON")
@@ -397,8 +397,8 @@ async def load_all_test_data(base_url: str = "http://127.0.0.1:8000") -> None:
         print("Статистика:")
         print(f"  - Кандидатов: {len(candidate_ids)}")
         print(f"  - Работодателей: {len(employer_ids)}")
-        print(f"  - Резюме: {len(load_json_file('resumes.json'))}")
-        print(f"  - Вакансий: {len(load_json_file('vacancies.json'))}")
+        print(f"  - Резюме: {len(load_json_file('../dummy/resumes.json'))}")
+        print(f"  - Вакансий: {len(load_json_file('../dummy/vacancies.json'))}")
         print("=" * 60)
 
     except Exception as e:

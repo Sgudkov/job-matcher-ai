@@ -1,7 +1,7 @@
 from typing import Type, TypeVar
 
-from backend.app.config import QdrantCollection
-from backend.app.models.match import CandidateMatch, EmployerMatch
+from app.config import QdrantCollection
+from app.models.match import CandidateMatch, EmployerMatch
 
 T = TypeVar("T", EmployerMatch, CandidateMatch)
 

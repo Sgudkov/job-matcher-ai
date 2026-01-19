@@ -3,11 +3,11 @@ import logging
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.config import QdrantCollection
-from backend.app.db.domain.unit_of_work import UnitOfWork
-from backend.app.db.infrastructure.database import qdrant_api
-from backend.app.db.infrastructure.orm import CandidateORM, EmployerORM
-from backend.app.models.candidate import (
+from app.config import QdrantCollection
+from app.db.domain.unit_of_work import UnitOfWork
+from app.db.infrastructure.database import qdrant_api
+from app.db.infrastructure.orm import CandidateORM, EmployerORM
+from app.models.candidate import (
     CandidateCreate,
     CandidateEmbedding,
     ResumeUpsert,
@@ -17,7 +17,7 @@ from backend.app.models.candidate import (
     ResumeCreate,
     CandidateBase,
 )
-from backend.app.models.employer import (
+from app.models.employer import (
     EmployerCreate,
     EmployerEmbedding,
     EmployerVacancyUpsert,
@@ -27,7 +27,7 @@ from backend.app.models.employer import (
     VacancyCreate,
     EmployerBase,
 )
-from backend.app.services.embeddings import vectorize_candidate, vectorize_employer
+from app.services.embeddings import vectorize_candidate, vectorize_employer
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
