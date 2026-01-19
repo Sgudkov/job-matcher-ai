@@ -1,0 +1,12 @@
+__pycache__
+*.pyc
+tests
+.env
+venv
+.idea
+.vscode
+frontend
+node_modules
+.next
+/app/dummy/
+/migrations/
