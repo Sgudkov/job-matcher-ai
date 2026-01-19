@@ -1,0 +1,39 @@
+/venv/
+/.env
+/.venv/
+/.ruff_cache/
+/.poetry/
+/.mypy_cache/
+/backend/alembic.ini
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.idea/
+.vscode/
+*~
+pytest-cache-*
+# Node.js
+node_modules/
+frontend/node_modules/
+
+# Next.js
+.next/
+out/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Env files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+/.coverage
+/backend/.poetry/
+/backend/app/dummy/
+/backend/whl/torch-2.4.1+cpu-cp312-cp312-linux_x86_64.whl
