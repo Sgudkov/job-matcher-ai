@@ -26,7 +26,7 @@ PS: Проект не закончен
 
 ### Обязательные файлы
 
-* Скачать файл http://download.pytorch.org/whl/cpu/torch-2.4.1%2Bcpu-cp312-cp312-linux_x86_64.whl в папку `backend/whl`
+* Скачать файл https://download.pytorch.org/whl/cpu/torch-2.4.1%2Bcpu-cp312-cp312-linux_x86_64.whl в папку `backend/whl`
 
 ### Переменные окружения
 
